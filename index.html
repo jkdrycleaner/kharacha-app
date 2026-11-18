@@ -579,6 +579,183 @@
       font-weight: 700;
     }
 
+    .report-controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .report-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .report-stat {
+      min-width: 0;
+      padding: 12px;
+      border-radius: 12px;
+      background: #F8FAFC;
+      border: 1px solid var(--card-border);
+    }
+
+    .report-stat-label {
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .35px;
+    }
+
+    .report-stat-value {
+      margin-top: 5px;
+      font-size: 18px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    .report-grid .clean-card {
+      min-width: 0;
+    }
+
+    .category-report {
+      display: grid;
+      grid-template-columns: 130px minmax(0, 1fr);
+      align-items: center;
+      gap: 14px;
+    }
+
+    .category-donut {
+      width: 126px;
+      height: 126px;
+      margin: auto;
+      border-radius: 50%;
+      background: conic-gradient(#E2E8F0 0deg 360deg);
+      position: relative;
+    }
+
+    .category-donut::after {
+      content: '';
+      position: absolute;
+      inset: 25px;
+      border-radius: 50%;
+      background: var(--surface);
+    }
+
+    .category-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .category-legend-row {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+    }
+
+    .category-legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    .trend-chart {
+      height: 160px;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-around;
+      gap: 8px;
+      padding: 14px 4px 0;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .trend-column {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+
+    .trend-bar-wrap {
+      height: 105px;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .trend-bar {
+      width: min(30px, 72%);
+      min-height: 3px;
+      background: linear-gradient(180deg, #2DD4BF, var(--accent-dark));
+      border-radius: 7px 7px 2px 2px;
+    }
+
+    .report-table-wrap {
+      overflow-x: auto;
+      margin: 0 -4px;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 580px;
+      font-size: 12px;
+    }
+
+    .report-table th, .report-table td {
+      padding: 11px 9px;
+      border-bottom: 1px solid var(--card-border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .report-table th {
+      color: var(--text-muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .35px;
+    }
+
+    .report-table td:last-child, .report-table th:last-child {
+      text-align: right;
+      font-weight: 800;
+    }
+
+    @media (max-width: 540px) {
+      .top-tab-switcher { gap: 0; }
+      .tab-btn { padding: 6px 9px; font-size: 11px; }
+      .report-grid { grid-template-columns: 1fr; gap: 0; }
+      .category-report { grid-template-columns: 115px minmax(0, 1fr); gap: 10px; }
+      .category-donut { width: 108px; height: 108px; }
+      .category-donut::after { inset: 22px; }
+      .report-stat-grid { gap: 6px; }
+      .report-stat { padding: 10px 8px; }
+      .report-stat-value { font-size: 15px; }
+    }
+
+    @media (max-width: 360px) {
+      header { padding: 10px; }
+      .brand { font-size: 16px; }
+      .top-tab-switcher { padding: 2px; }
+      .tab-btn { padding: 5px 6px; font-size: 10px; }
+    }
+
     /* Toast */
     #toast {
       position: fixed;
@@ -610,6 +787,7 @@
     <div class="top-tab-switcher">
       <button class="tab-btn active" id="tabPersonal">Personal</button>
       <button class="tab-btn" id="tabGroup">Group Split</button>
+      <button class="tab-btn" id="tabReports">Reports</button>
     </div>
   </header>
 
@@ -651,6 +829,84 @@
       </div>
 
       <div class="expense-list" id="personalExpenseList"></div>
+    </div>
+
+    <div id="viewReports" style="display: none;">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Spending report</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">Category insights and expense history</div>
+        </div>
+        <button id="btnExportReport" class="btn-pill" type="button">Export CSV</button>
+      </div>
+
+      <div class="clean-card">
+        <div class="report-controls">
+          <div>
+            <label class="form-label" for="reportScope">Expense type</label>
+            <select id="reportScope" class="form-control">
+              <option value="all">Personal + Group</option>
+              <option value="personal">Personal</option>
+              <option value="group">Group</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="reportPeriod">Date range</label>
+            <select id="reportPeriod" class="form-control">
+              <option value="month">This month</option>
+              <option value="last30">Last 30 days</option>
+              <option value="lastMonth">Last month</option>
+              <option value="all">All time</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="reportCategory">Category</label>
+            <select id="reportCategory" class="form-control">
+              <option value="all">All categories</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="reportSearch">Search</label>
+            <input id="reportSearch" class="form-control" type="search" placeholder="Search expenses">
+          </div>
+        </div>
+      </div>
+
+      <div class="clean-card">
+        <div class="report-stat-grid">
+          <div class="report-stat"><div class="report-stat-label">Total spend</div><div class="report-stat-value">₹<span id="reportTotal">0</span></div></div>
+          <div class="report-stat"><div class="report-stat-label">Transactions</div><div class="report-stat-value" id="reportCount">0</div></div>
+          <div class="report-stat"><div class="report-stat-label">Average / expense</div><div class="report-stat-value">₹<span id="reportAverage">0</span></div></div>
+        </div>
+      </div>
+
+      <div class="report-grid">
+        <div class="clean-card">
+          <div class="section-title" style="margin-bottom:14px;">Spending by category</div>
+          <div class="category-report">
+            <div id="categoryDonut" class="category-donut" role="img" aria-label="Spending by category chart"></div>
+            <div id="categoryLegend" class="category-legend"></div>
+          </div>
+        </div>
+        <div class="clean-card">
+          <div class="section-title" style="margin-bottom:4px;">Monthly trend</div>
+          <div style="font-size:11px; color:var(--text-muted);">Last 6 months</div>
+          <div id="monthlyTrend" class="trend-chart" role="img" aria-label="Monthly spending chart"></div>
+        </div>
+      </div>
+
+      <div class="clean-card">
+        <div class="section-header" style="margin-top:0;">
+          <div class="section-title">Expense details</div>
+          <span id="reportResultCount" style="font-size:11px; color:var(--text-muted);"></span>
+        </div>
+        <div class="report-table-wrap">
+          <table class="report-table">
+            <thead><tr><th>Date</th><th>Expense</th><th>Category</th><th>Type</th><th>Payment</th><th>Amount</th></tr></thead>
+            <tbody id="reportTableBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- View 2: Group Split Full Featured -->
@@ -1013,7 +1269,7 @@
 
     let customCategories = JSON.parse(localStorage.getItem('kharacha_categories') || JSON.stringify([
       { key: 'food', emoji: '🍔', label: 'Food & Drinks', keywords: ['chai', 'tea', 'coffee', 'khana', 'dinner', 'lunch', 'breakfast', 'pizza', 'burger', 'hotel', 'restaurant', 'dhaba', 'samosa', 'zomato', 'swiggy'] },
-      { key: 'fuel', emoji: '⛽', label: 'Fuel & Travel', keywords: ['petrol', 'diesel', 'fuel', 'auto', 'cab', 'uber', 'ola', 'metro', 'fare', 'toll', 'parking', 'bike', 'car', 'flight'] },
+      { key: 'fuel', emoji: '⛽', label: 'Fuel & Travel', keywords: ['petrol', 'diesel', 'fuel', 'auto', 'cab', 'taxi', 'uber', 'ola', 'metro', 'bus', 'train', 'fare', 'toll', 'parking', 'bike', 'car', 'flight', 'travel'] },
       { key: 'grocery', emoji: '🛍️', label: 'Shopping & Grocery', keywords: ['ration', 'doodh', 'milk', 'grocery', 'sabji', 'vegetable', 'fruit', 'shop', 'amazon', 'flipkart', 'kapde'] },
       { key: 'bills', emoji: '🏠', label: 'Bills & Utilities', keywords: ['rent', 'kiraya', 'bijli', 'electricity', 'wifi', 'recharge', 'water', 'gas', 'cylinder'] },
       { key: 'entertainment', emoji: '🎬', label: 'Entertainment', keywords: ['movie', 'cinema', 'party', 'netflix', 'game', 'fun', 'outing', 'club'] },
@@ -1036,6 +1292,10 @@
       [select, voiceSelect].forEach(sel => {
         if (!sel) return;
         sel.innerHTML = '';
+        const autoOption = document.createElement('option');
+        autoOption.value = '';
+        autoOption.textContent = '✨ Auto-detect category';
+        sel.appendChild(autoOption);
         customCategories.forEach(c => {
           const opt = document.createElement('option');
           opt.value = c.key;
@@ -1047,12 +1307,14 @@
 
     function detectCategory(text) {
       const lower = text.toLowerCase();
+      const words = lower.split(/[^a-z0-9]+/);
       for (const cat of customCategories) {
-        if (cat.keywords && Array.isArray(cat.keywords)) {
-          for (const kw of cat.keywords) {
-            if (lower.includes(kw)) {
-              return cat;
-            }
+        const savedKeywords = Array.isArray(cat.keywords) ? cat.keywords : [];
+        const legacyKeywords = cat.key === 'fuel' ? ['taxi', 'bus', 'train', 'travel'] : [];
+        for (const kw of [...savedKeywords, ...legacyKeywords]) {
+          const keyword = kw.toLowerCase();
+          if (keyword.includes(' ') ? lower.includes(keyword) : words.includes(keyword)) {
+            return cat;
           }
         }
         if (lower.includes(cat.label.toLowerCase())) {
@@ -1380,8 +1642,9 @@
         }
 
         const splitData = {};
-        const shareAmt = Math.round((pendingVoiceData.amount / checkedMembers.length) * 100) / 100;
+        const shareAmt = pendingVoiceData.amount / checkedMembers.length;
         checkedMembers.forEach(m => splitData[m] = shareAmt);
+        balanceRoundedSplit(pendingVoiceData.amount, splitData, checkedMembers);
 
         const newExp = {
           id: Date.now().toString(),
@@ -1391,6 +1654,8 @@
           paymentMode: chosenPay,
           splitMode: 'equal',
           splitData: splitData,
+          category: catObj.key || 'other',
+          emoji: catObj.emoji || '💸',
           date: chosenDate,
           remark: chosenRemark
         };
@@ -1551,7 +1816,12 @@
       const pay = detectPaymentMode(text);
 
       let title = text.replace(new RegExp(`\\b${amount}\\b`, 'g'), '')
-                      .replace(/rupaye|rupee|rs|ka|mein|ko|ke sath|with|upi|cash|card|barabar|sab/gi, '').trim();
+                      .replace(/\b(?:rupaye|rupee|rupees|rs|inr|ka|mein|ko|ke\s+sath|with|upi|cash|card|netbanking|split|divide|among|barabar|sabhi|sab|doston|dosto|me|and|aur)\b/gi, ' ')
+                      .trim();
+      currentGroup.members.filter(m => m !== 'You').forEach(member => {
+        title = title.replace(new RegExp(`\\b${member.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), ' ');
+      });
+      title = title.replace(/\s+/g, ' ').trim();
       if (!title) title = cat.label;
       title = title.charAt(0).toUpperCase() + title.slice(1);
 
@@ -1594,7 +1864,8 @@
 
       let total = 0;
       let todayTotal = 0;
-      const todayStr = new Date().toDateString();
+      const now = new Date();
+      const todayStr = now.toDateString();
 
       if (personalExpenses.length === 0) {
         listContainer.innerHTML = `
@@ -1606,9 +1877,10 @@
         `;
       } else {
         personalExpenses.forEach(item => {
-          total += item.amount;
+          const itemAmount = Number(item.amount) || 0;
           const itemDate = new Date(item.date);
-          if (itemDate.toDateString() === todayStr) todayTotal += item.amount;
+          if (itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear()) total += itemAmount;
+          if (itemDate.toDateString() === todayStr) todayTotal += itemAmount;
 
           const timeFormatted = itemDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -1644,6 +1916,7 @@
       document.getElementById('totalPersonalAmount').textContent = total.toLocaleString('en-IN');
       document.getElementById('todayAmount').textContent = todayTotal.toLocaleString('en-IN');
       document.getElementById('totalCount').textContent = personalExpenses.length;
+      renderReports();
     }
 
     function saveAndRenderGroup() {
@@ -1773,14 +2046,15 @@
 
           let payerStr = typeof exp.paidBy === 'object' ? 'Multiple Payers' : `Paid by <b>${exp.paidBy}</b>`;
           let modeBadge = exp.splitMode ? exp.splitMode.toUpperCase() : 'EQUAL';
+          const expenseCategory = CATEGORIES[exp.category] || { label: 'General Expense', emoji: '👥' };
 
           div.innerHTML = `
             <div class="item-left">
-              <div class="category-icon">👥</div>
+              <div class="category-icon">${exp.emoji || expenseCategory.emoji}</div>
               <div>
                 <div class="item-title">${exp.title}</div>
                 <div class="item-meta">
-                  📅 ${(exp.date ? new Date(exp.date) : new Date()).toLocaleDateString('en-IN', { day:'numeric', month:'short' })} • ${payerStr} • <span style="color:var(--accent); font-weight:700;">${modeBadge}</span>
+                  📅 ${(exp.date ? new Date(exp.date) : new Date()).toLocaleDateString('en-IN', { day:'numeric', month:'short' })} • ${expenseCategory.label} • ${payerStr} • <span style="color:var(--accent); font-weight:700;">${modeBadge}</span>
                   <span class="payment-badge">${exp.paymentMode || 'UPI'}</span>
                 </div>
                 ${exp.remark ? `<div style="font-size:11px; color:var(--text-muted); font-style:italic; margin-top:2px;">💬 ${exp.remark}</div>` : ''}
@@ -1800,6 +2074,194 @@
           listContainer.appendChild(div);
         });
       }
+      renderReports();
+    }
+
+    const reportColors = ['#0D9488', '#F59E0B', '#6366F1', '#EC4899', '#3B82F6', '#84CC16', '#F97316', '#8B5CF6'];
+
+    function reportCategoryFor(expense) {
+      return CATEGORIES[expense.category] || { key: 'other', label: 'General Expense', emoji: '💸' };
+    }
+
+    function getReportEntries(scope) {
+      const entries = [];
+      if (scope !== 'group') {
+        personalExpenses.forEach(expense => {
+          entries.push({ ...expense, type: 'Personal', categoryInfo: reportCategoryFor(expense) });
+        });
+      }
+      if (scope !== 'personal') {
+        currentGroup.expenses.forEach(expense => {
+          entries.push({ ...expense, type: 'Group', categoryInfo: reportCategoryFor(expense) });
+        });
+      }
+      return entries.filter(entry => Number.isFinite(Number(entry.amount)) && Number(entry.amount) >= 0);
+    }
+
+    function reportDateMatches(entry, period) {
+      if (period === 'all') return true;
+      if (!entry.date) return false;
+      const date = new Date(entry.date);
+      if (Number.isNaN(date.getTime())) return false;
+      const now = new Date();
+      if (period === 'month') {
+        return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+      }
+      if (period === 'lastMonth') {
+        const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        return date.getFullYear() === previousMonth.getFullYear() && date.getMonth() === previousMonth.getMonth();
+      }
+      const since = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29);
+      const until = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      return date >= since && date < until;
+    }
+
+    function renderReports() {
+      const scope = document.getElementById('reportScope').value;
+      const period = document.getElementById('reportPeriod').value;
+      const search = document.getElementById('reportSearch').value.trim().toLowerCase();
+      const categorySelect = document.getElementById('reportCategory');
+      const selectedCategory = categorySelect.value;
+      const knownCategories = [...customCategories];
+      if (!knownCategories.some(category => category.key === 'other')) {
+        knownCategories.push({ key: 'other', label: 'General Expense', emoji: '💸' });
+      }
+      categorySelect.innerHTML = '<option value="all">All categories</option>';
+      knownCategories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.key;
+        option.textContent = `${category.emoji} ${category.label}`;
+        categorySelect.appendChild(option);
+      });
+      categorySelect.value = knownCategories.some(category => category.key === selectedCategory) ? selectedCategory : 'all';
+
+      const sourceEntries = getReportEntries(scope);
+      const periodEntries = sourceEntries.filter(entry => reportDateMatches(entry, period));
+      const entries = periodEntries.filter(entry => {
+        const category = reportCategoryFor(entry);
+        const matchesCategory = categorySelect.value === 'all' || category.key === categorySelect.value;
+        const matchesSearch = !search || [entry.title, entry.remark, category.label, entry.type, entry.paymentMode]
+          .some(value => String(value || '').toLowerCase().includes(search));
+        return matchesCategory && matchesSearch;
+      }).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+      const total = entries.reduce((sum, entry) => sum + Number(entry.amount), 0);
+      document.getElementById('reportTotal').textContent = total.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+      document.getElementById('reportCount').textContent = entries.length.toLocaleString('en-IN');
+      document.getElementById('reportAverage').textContent = (entries.length ? total / entries.length : 0)
+        .toLocaleString('en-IN', { maximumFractionDigits: 2 });
+      document.getElementById('reportResultCount').textContent = `${entries.length} records`;
+
+      const categoryTotals = new Map();
+      entries.forEach(entry => {
+        const category = reportCategoryFor(entry);
+        const item = categoryTotals.get(category.key) || { ...category, amount: 0 };
+        item.amount += Number(entry.amount);
+        categoryTotals.set(category.key, item);
+      });
+      const sortedCategories = [...categoryTotals.values()].sort((a, b) => b.amount - a.amount);
+      let angle = 0;
+      const segments = sortedCategories.map((category, index) => {
+        const nextAngle = angle + (total ? category.amount / total * 360 : 0);
+        const segment = `${reportColors[index % reportColors.length]} ${angle}deg ${nextAngle}deg`;
+        angle = nextAngle;
+        return segment;
+      });
+      document.getElementById('categoryDonut').style.background = segments.length
+        ? `conic-gradient(${segments.join(',')})`
+        : 'conic-gradient(#E2E8F0 0deg 360deg)';
+
+      const legend = document.getElementById('categoryLegend');
+      legend.replaceChildren();
+      if (!sortedCategories.length) {
+        const empty = document.createElement('div');
+        empty.style.cssText = 'font-size:11px; color:var(--text-muted);';
+        empty.textContent = 'No expenses for this selection.';
+        legend.appendChild(empty);
+      } else {
+        sortedCategories.forEach((category, index) => {
+          const row = document.createElement('div');
+          row.className = 'category-legend-row';
+          const dot = document.createElement('span');
+          dot.className = 'category-legend-dot';
+          dot.style.backgroundColor = reportColors[index % reportColors.length];
+          const label = document.createElement('span');
+          label.style.cssText = 'overflow:hidden; text-overflow:ellipsis;';
+          label.textContent = `${category.emoji} ${category.label}`;
+          const value = document.createElement('b');
+          value.textContent = `₹${category.amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+          row.append(dot, label, value);
+          legend.appendChild(row);
+        });
+      }
+
+      const trend = document.getElementById('monthlyTrend');
+      trend.replaceChildren();
+      const monthBuckets = [];
+      const now = new Date();
+      for (let offset = 5; offset >= 0; offset--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+        monthBuckets.push({
+          date,
+          amount: 0,
+          label: date.toLocaleDateString('en-IN', { month: 'short' })
+        });
+      }
+      sourceEntries.forEach(entry => {
+        const date = new Date(entry.date || 0);
+        const bucket = monthBuckets.find(item => item.date.getFullYear() === date.getFullYear() && item.date.getMonth() === date.getMonth());
+        if (bucket) bucket.amount += Number(entry.amount);
+      });
+      const maxMonth = Math.max(...monthBuckets.map(month => month.amount), 0);
+      monthBuckets.forEach(month => {
+        const column = document.createElement('div');
+        column.className = 'trend-column';
+        const value = document.createElement('span');
+        value.textContent = month.amount ? `₹${Math.round(month.amount).toLocaleString('en-IN')}` : '₹0';
+        const barWrap = document.createElement('div');
+        barWrap.className = 'trend-bar-wrap';
+        const bar = document.createElement('div');
+        bar.className = 'trend-bar';
+        bar.style.height = `${maxMonth ? Math.max(4, month.amount / maxMonth * 100) : 3}%`;
+        bar.title = `${month.label}: ₹${month.amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+        barWrap.appendChild(bar);
+        const label = document.createElement('span');
+        label.textContent = month.label;
+        column.append(value, barWrap, label);
+        trend.appendChild(column);
+      });
+
+      const tableBody = document.getElementById('reportTableBody');
+      tableBody.replaceChildren();
+      if (!entries.length) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 6;
+        cell.style.cssText = 'text-align:center; color:var(--text-muted); padding:24px;';
+        cell.textContent = 'No expenses match these filters.';
+        row.appendChild(cell);
+        tableBody.appendChild(row);
+      } else {
+        entries.forEach(entry => {
+          const row = document.createElement('tr');
+          const date = entry.date ? new Date(entry.date) : null;
+          const cells = [
+            !date || Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }),
+            entry.title || 'Untitled',
+            `${reportCategoryFor(entry).emoji} ${reportCategoryFor(entry).label}`,
+            entry.type,
+            entry.paymentMode || 'UPI',
+            `₹${Number(entry.amount).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`
+          ];
+          cells.forEach(value => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            row.appendChild(cell);
+          });
+          tableBody.appendChild(row);
+        });
+      }
+      window.currentReportEntries = entries;
     }
 
     function openUpiPay(amount) {
@@ -1850,7 +2312,9 @@
           if (selectCat && exp.category) selectCat.value = exp.category;
           document.getElementById('personalCategorySelectGroup').style.display = 'block';
         } else {
-          document.getElementById('personalCategorySelectGroup').style.display = 'none';
+          document.getElementById('personalCategorySelectGroup').style.display = 'block';
+          const selectCat = document.getElementById('selectPersonalCategory');
+          if (selectCat && exp.category) selectCat.value = exp.category;
         }
 
         // Payment Mode
@@ -1865,8 +2329,33 @@
           document.querySelectorAll('.split-mode-pill').forEach(b => {
             b.classList.toggle('active', b.dataset.mode === currentSplitMode);
           });
-          selectSinglePayer.value = typeof exp.paidBy === 'string' ? exp.paidBy : 'You';
+          isMultiPayMode = typeof exp.paidBy === 'object' && exp.paidBy !== null;
+          btnToggleMultiPay.textContent = isMultiPayMode ? 'Single Payer?' : 'Multiple Payers?';
+          selectSinglePayer.style.display = isMultiPayMode ? 'none' : 'block';
+          multiPayContainer.style.display = isMultiPayMode ? 'block' : 'none';
+          if (isMultiPayMode) {
+            renderMultiPayInputs();
+            document.querySelectorAll('.multi-pay-val').forEach(input => {
+              input.value = exp.paidBy[input.dataset.member] || '';
+            });
+          } else {
+            selectSinglePayer.value = exp.paidBy || 'You';
+          }
           renderSplitBreakdownRows();
+          if (currentSplitMode !== 'equal' && exp.splitData) {
+            document.querySelectorAll('.split-member-row').forEach(row => {
+              const checkbox = row.querySelector('.split-member-chk');
+              const member = checkbox.dataset.member;
+              checkbox.checked = Object.prototype.hasOwnProperty.call(exp.splitData, member);
+              const valueInput = row.querySelector('.split-member-val');
+              const amountShare = Number(exp.splitData[member]) || 0;
+              valueInput.value = currentSplitMode === 'percent'
+                ? (exp.amount ? (amountShare / exp.amount * 100).toFixed(4) : '0')
+                : amountShare;
+              valueInput.dataset.modified = 'true';
+            });
+            recalculateSplitBreakdown();
+          }
         }
 
         addModal.style.display = 'flex';
@@ -2125,7 +2614,15 @@
         if (currentSplitMode === 'equal') {
           unitSpan.textContent = '₹';
           valInput.readOnly = true;
-          valInput.value = activeMembers.length > 0 ? (Math.round((total / activeMembers.length) * 100) / 100) : 0;
+          if (activeMembers.length) {
+            const totalCents = Math.round(total * 100);
+            const baseCents = Math.floor(totalCents / activeMembers.length);
+            const remainderCents = totalCents - baseCents * activeMembers.length;
+            const isLastMember = activeMembers.indexOf(m) === activeMembers.length - 1;
+            valInput.value = ((baseCents + (isLastMember ? remainderCents : 0)) / 100).toFixed(2);
+          } else {
+            valInput.value = '0.00';
+          }
         } else if (currentSplitMode === 'exact') {
           unitSpan.textContent = '₹';
           valInput.readOnly = false;
@@ -2143,6 +2640,17 @@
       });
     }
 
+    function balanceRoundedSplit(total, splitData, members) {
+      if (!members.length) return;
+      const lastMember = members[members.length - 1];
+      let roundedTotal = 0;
+      members.slice(0, -1).forEach(member => {
+        splitData[member] = Math.round(splitData[member] * 100) / 100;
+        roundedTotal += splitData[member];
+      });
+      splitData[lastMember] = Math.round((total - roundedTotal) * 100) / 100;
+    }
+
     function onCustomValInput(e) {
       e.target.dataset.modified = "true";
     }
@@ -2154,7 +2662,7 @@
       const amount = parseFloat(inputAmount.value);
       const title = document.getElementById('inputTitle').value.trim();
 
-      if (!amount || !title) {
+      if (!Number.isFinite(amount) || amount <= 0 || !title) {
         showToast('Please enter both amount and title!');
         return;
       }
@@ -2199,7 +2707,7 @@
               multiSum += val;
             }
           });
-          if (Math.abs(multiSum - amount) > 1) {
+          if (Object.keys(paidByData).length === 0 || Math.abs(multiSum - amount) > 0.01) {
             showToast(`Payer sum (₹${multiSum}) must match total ₹${amount}!`);
             return;
           }
@@ -2207,38 +2715,66 @@
 
         const splitData = {};
         const activeBoxes = Array.from(document.querySelectorAll('.split-member-chk:checked'));
+        const activeMembers = activeBoxes.map(box => box.dataset.member);
+        if (activeMembers.length === 0) {
+          showToast('Select at least one member to split!');
+          return;
+        }
 
         if (currentSplitMode === 'equal') {
-          const share = Math.round((amount / activeBoxes.length) * 100) / 100;
+          const share = amount / activeBoxes.length;
           activeBoxes.forEach(b => splitData[b.dataset.member] = share);
+          balanceRoundedSplit(amount, splitData, activeMembers);
         } else if (currentSplitMode === 'exact') {
           let exactSum = 0;
           activeBoxes.forEach(b => {
             const val = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 0;
+            if (val < 0) return;
             splitData[b.dataset.member] = val;
             exactSum += val;
           });
-          if (Math.abs(exactSum - amount) > 1) {
+          if (Object.keys(splitData).length !== activeBoxes.length || Math.abs(exactSum - amount) > 0.01) {
             showToast(`Split sum (₹${exactSum}) must match total ₹${amount}!`);
             return;
           }
         } else if (currentSplitMode === 'percent') {
+          let percentTotal = 0;
           activeBoxes.forEach(b => {
             const pct = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 0;
-            splitData[b.dataset.member] = Math.round((amount * (pct / 100)) * 100) / 100;
+            if (pct < 0) return;
+            percentTotal += pct;
+            splitData[b.dataset.member] = amount * (pct / 100);
           });
+          if (Object.keys(splitData).length !== activeBoxes.length || Math.abs(percentTotal - 100) > 0.01) {
+            showToast(`Percentages must total 100% (currently ${percentTotal}%).`);
+            return;
+          }
+          balanceRoundedSplit(amount, splitData, activeMembers);
         } else if (currentSplitMode === 'shares') {
           let totalShares = 0;
           activeBoxes.forEach(b => {
-            const s = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 1;
+            const s = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 0;
+            if (s <= 0) return;
             totalShares += s;
           });
+          if (totalShares <= 0) {
+            showToast('Each selected member must have at least one share.');
+            return;
+          }
           activeBoxes.forEach(b => {
-            const s = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 1;
-            splitData[b.dataset.member] = Math.round((amount * (s / totalShares)) * 100) / 100;
+            const s = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 0;
+            if (s <= 0) return;
+            splitData[b.dataset.member] = amount * (s / totalShares);
           });
+          if (Object.keys(splitData).length !== activeBoxes.length) {
+            showToast('Each selected member must have at least one share.');
+            return;
+          }
+          balanceRoundedSplit(amount, splitData, activeMembers);
         }
 
+        const selectedCatKey = document.getElementById('selectPersonalCategory').value;
+        const cat = CATEGORIES[selectedCatKey] || detectCategory(title);
         const expData = {
           id: editingExpenseId || Date.now().toString(),
           title: title,
@@ -2247,6 +2783,8 @@
           paymentMode: selectedPaymentMode,
           splitMode: currentSplitMode,
           splitData: splitData,
+          category: cat.key || 'other',
+          emoji: cat.emoji || '💸',
           date: chosenExpDate,
           remark: chosenRemarkVal
         };
@@ -2298,23 +2836,75 @@
     ============================================================== */
     const tabPersonal = document.getElementById('tabPersonal');
     const tabGroup = document.getElementById('tabGroup');
+    const tabReports = document.getElementById('tabReports');
     const viewPersonal = document.getElementById('viewPersonal');
     const viewGroup = document.getElementById('viewGroup');
+    const viewReports = document.getElementById('viewReports');
+    const groupInviteButton = document.getElementById('btnGroupInvite');
 
     tabPersonal.addEventListener('click', () => {
       tabPersonal.classList.add('active');
       tabGroup.classList.remove('active');
+      tabReports.classList.remove('active');
       viewPersonal.style.display = 'block';
       viewGroup.style.display = 'none';
+      viewReports.style.display = 'none';
+      groupInviteButton.style.visibility = 'hidden';
       currentTab = 'personal';
     });
 
     tabGroup.addEventListener('click', () => {
       tabGroup.classList.add('active');
       tabPersonal.classList.remove('active');
+      tabReports.classList.remove('active');
       viewPersonal.style.display = 'none';
       viewGroup.style.display = 'block';
+      viewReports.style.display = 'none';
+      groupInviteButton.style.visibility = 'visible';
       currentTab = 'group';
+    });
+
+    tabReports.addEventListener('click', () => {
+      tabReports.classList.add('active');
+      tabPersonal.classList.remove('active');
+      tabGroup.classList.remove('active');
+      viewPersonal.style.display = 'none';
+      viewGroup.style.display = 'none';
+      viewReports.style.display = 'block';
+      groupInviteButton.style.visibility = 'hidden';
+      currentTab = 'reports';
+      renderReports();
+    });
+
+    ['reportScope', 'reportPeriod', 'reportCategory'].forEach(id => {
+      document.getElementById(id).addEventListener('change', renderReports);
+    });
+    document.getElementById('reportSearch').addEventListener('input', renderReports);
+    document.getElementById('btnExportReport').addEventListener('click', () => {
+      const entries = window.currentReportEntries || [];
+      if (!entries.length) {
+        showToast('No report rows to export.');
+        return;
+      }
+      const escapeCsv = value => `"${String(value == null ? '' : value).replace(/"/g, '""')}"`;
+      const rows = [
+        ['Date', 'Expense', 'Category', 'Type', 'Payment', 'Amount'],
+        ...entries.map(entry => [
+          entry.date ? new Date(entry.date).toLocaleDateString('en-IN') : '',
+          entry.title || '',
+          reportCategoryFor(entry).label,
+          entry.type,
+          entry.paymentMode || 'UPI',
+          Number(entry.amount).toFixed(2)
+        ])
+      ];
+      const csv = rows.map(row => row.map(escapeCsv).join(',')).join('\r\n');
+      const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `kharacha-report-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
     });
 
     const addModal = document.getElementById('addModal');
@@ -2331,7 +2921,21 @@
       document.getElementById('expenseTypeGroup').style.display = 'block';
       document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
       document.getElementById('inputRemark').value = '';
-      modalMode = currentTab;
+      document.getElementById('inputAmount').value = '';
+      document.getElementById('inputTitle').value = '';
+      selectedPaymentMode = 'UPI';
+      document.querySelectorAll('.payment-mode-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.dataset.pay === selectedPaymentMode);
+      });
+      currentSplitMode = 'equal';
+      document.querySelectorAll('.split-mode-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.dataset.mode === currentSplitMode);
+      });
+      isMultiPayMode = false;
+      btnToggleMultiPay.textContent = 'Multiple Payers?';
+      selectSinglePayer.style.display = 'block';
+      multiPayContainer.style.display = 'none';
+      modalMode = currentTab === 'group' ? 'group' : 'personal';
       updateModalFields();
       addModal.style.display = 'flex';
     });
@@ -2360,7 +2964,8 @@
         modalTypeGroup.classList.add('active');
         modalTypePersonal.classList.remove('active');
         groupSplitFields.style.display = 'block';
-        document.getElementById('personalCategorySelectGroup').style.display = 'none';
+        document.getElementById('personalCategorySelectGroup').style.display = 'block';
+        populateCategorySelects();
 
         selectSinglePayer.innerHTML = '';
         currentGroup.members.forEach(m => {

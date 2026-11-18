@@ -56,9 +56,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.3-release
-          name: "Kharacha v1.3 - Voice Interactive Dialog, Zero Mock Data, Group Month Total & Member Breakdown"
-          body: "Official Release v1.3 of Kharacha APK:\n- Conversational AI Voice: App speaks to confirm (Personal vs Split, Members, Payment mode) and listens for voice answers\n- Clean Database: Zero predefined/mock entries, 100% user-entered persistent data\n- Group Month Total: Tracks current month group expenses\n- Name-wise Member Expense & Share Breakdown (Paid vs Share with Net Balances)\n- Date picker, Remarks, Category manager, 4 Split modes, and Cloud sync"
+          tag_name: v1.4-release
+          name: "Kharacha v1.4 - Full Analytics & Reports Dashboard, Visual Charts & CSV Export"
+          body: "Official Release v1.4 of Kharacha APK:\n- Integrated Advanced Reports & Analytics Dashboard (Category Donut Chart, Spending Trends & Monthly Stats)\n- Filter by Scope (Personal, Group, Combined), Time Period, and Category\n- Instant CSV Export for spreadsheets\n- Two-way Voice AI, Clean zero-mock database, 4-mode split & cloud sync"
           files: android/app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
