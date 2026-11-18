@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kharacha - Smart Split & Expense Manager</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
+
+  <style>
+    /* ==============================================================
+       PREMIUM CLEAN LIGHT THEME (Fintech Style)
+    ============================================================== */
+    :root {
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --card-border: #E2E8F0;
+      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --accent: #0D9488;         /* Teal / Emerald */
+      --accent-light: #CCFBF1;
+      --accent-dark: #0F766E;
+      --text-main: #0F172A;     /* Deep Slate */
+      --text-muted: #64748B;    /* Cool Grey */
+      --danger: #EF4444;
+      --danger-light: #FEE2E2;
+      --warning: #F59E0B;
+      --warning-light: #FEF3C7;
+      --success: #10B981;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top Header */
+    header {
+      padding: 12px 18px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.4px;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    .top-tab-switcher {
+      display: flex;
+      background: #F1F5F9;
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      padding: 3px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--accent);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    /* Main Scroll Area */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      padding-bottom: 110px;
+    }
+
+    /* Cards */
+    .clean-card {
+      background: var(--surface);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .summary-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .summary-amount {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .summary-amount small {
+      font-size: 20px;
+      color: var(--accent);
+      margin-right: 2px;
+    }
+
+    .summary-subgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .sub-stat-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .sub-stat-val {
+      font-size: 16px;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    /* Section Headings */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      margin-top: 6px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    /* Expense Item List */
+    .expense-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .expense-item {
+      background: var(--surface);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      transition: transform 0.1s;
+    }
+
+    .expense-item:active {
+      transform: scale(0.99);
+    }
+
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .category-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #F1F5F9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .item-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .item-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .item-amount {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+      text-align: right;
+    }
+
+    .item-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      margin-top: 3px;
+      display: inline-block;
+    }
+
+    /* Settlement Debts Cards */
+    .settle-card {
+      background: #F8FAFC;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .settle-text {
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .settle-text b {
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+
+    .settle-btn {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+    }
+
+    .btn-pill {
+      background: var(--surface);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-pill.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Split Configuration Grid in Modal */
+    .split-member-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--card-border);
+      background: #F8FAFC;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+
+    .split-member-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .split-input-box {
+      width: 75px;
+      padding: 6px 8px;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      background: #fff;
+      font-size: 13px;
+      text-align: right;
+      font-weight: 700;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .split-input-box:focus {
+      border-color: var(--accent);
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 22px;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .form-control {
+      width: 100%;
+      background: #F8FAFC;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+      background: #fff;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 13px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      background: #F1F5F9;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      padding: 11px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 24px 24px 24px;
+      background: linear-gradient(to top, rgba(248, 250, 252, 1) 75%, rgba(248, 250, 252, 0));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      z-index: 20;
+    }
+
+    .mic-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0D9488, #0F766E);
+      border: 4px solid #FFFFFF;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(13, 148, 136, 0.4);
+      transition: all 0.2s;
+    }
+
+    .mic-btn:active, .mic-btn.listening {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+      background: linear-gradient(135deg, #EF4444, #DC2626);
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .action-btn-circle {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--card-shadow);
+    }
+
+    /* Live Voice Banner */
+    .voice-banner {
+      position: fixed;
+      top: 65px;
+      left: 16px;
+      right: 16px;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 14px;
+      z-index: 50;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .voice-banner.active {
+      display: block;
+    }
+
+    .voice-transcript {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .voice-detected-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .v-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 5px;
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 95px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text-main);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 20px;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand">
+      💸 <span>Kharacha</span>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="top-tab-switcher">
+      <button class="tab-btn active" id="tabPersonal">Personal</button>
+      <button class="tab-btn" id="tabGroup">Group Split</button>
+    </div>
+  </header>
+
+  <!-- Live Voice Listening Banner -->
+  <div id="voiceBanner" class="voice-banner">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+      <span style="font-size:11px; color:var(--accent); font-weight:800;">🎙️ LISTENING (बोलिए...)</span>
+      <span id="voiceStatus" style="font-size:11px; color:var(--text-muted);">Listening</span>
+    </div>
+    <div id="voiceTranscript" class="voice-transcript">"पेट्रोल 500" या "डिनर 1200 राहुल और अमन"</div>
+    <div id="voiceTags" class="voice-detected-tags"></div>
+  </div>
+
+  <!-- Main Scrollable Content -->
+  <main>
+    <!-- View 1: Personal Expenses -->
+    <div id="viewPersonal">
+      <div class="clean-card">
+        <div class="summary-title">Total This Month (इस महीने का खर्च)</div>
+        <div class="summary-amount"><small>₹</small><span id="totalPersonalAmount">0</span></div>
+        <div class="summary-subgrid">
+          <div>
+            <div class="sub-stat-title">Today's Expense</div>
+            <div class="sub-stat-val" style="color: var(--accent);">₹<span id="todayAmount">0</span></div>
+          </div>
+          <div>
+            <div class="sub-stat-title">Transactions</div>
+            <div class="sub-stat-val" id="totalCount">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">Personal Expense History</div>
+        <span style="font-size: 11px; color: var(--text-muted);" id="dateLabel">Recent</span>
+      </div>
+
+      <div class="expense-list" id="personalExpenseList"></div>
+    </div>
+
+    <!-- View 2: Group Split Full Featured -->
+    <div id="viewGroup" style="display: none;">
+      <div id="activeGroupView">
+        <!-- Active Group Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <h2 id="currentGroupName" style="font-size: 18px; font-weight: 800; color:var(--text-main);">🏖️ Goa Trip 2026</h2>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+              Room Code: <b id="currentRoomCode" style="color: var(--accent); cursor: pointer;" title="Tap to copy">GOA713</b>
+              • <span id="membersCountText">3 Members</span>
+            </div>
+          </div>
+          <button id="btnSwitchGroup" class="action-btn-circle" style="width: 38px; height: 38px;" title="Groups & Rooms">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Group Summary Card -->
+        <div class="clean-card">
+          <div class="summary-title">Total Group Spent (कुल खर्च)</div>
+          <div class="summary-amount"><small>₹</small><span id="groupTotalAmount">0</span></div>
+          <div class="summary-subgrid">
+            <div>
+              <div class="sub-stat-title">You Paid</div>
+              <div class="sub-stat-val" style="color:var(--text-main);">₹<span id="youPaidAmount">0</span></div>
+            </div>
+            <div>
+              <div class="sub-stat-title">Your Share</div>
+              <div class="sub-stat-val" style="color:var(--warning);">₹<span id="yourShareAmount">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settlements Calculation (Simplify Debts) -->
+        <div class="section-header">
+          <div class="section-title">⚡ Settlement (किसको किससे कितना लेना है)</div>
+          <button id="btnExportWhatsApp" style="background:none; border:none; color:var(--accent); font-size:12px; font-weight:700; cursor:pointer;">📲 Share WhatsApp</button>
+        </div>
+        <div id="settlementsListContainer" style="margin-bottom: 18px;"></div>
+
+        <!-- Group Transactions -->
+        <div class="section-header">
+          <div class="section-title">Expenses in Group</div>
+          <button id="btnShareGroupLink" style="background:none; border:none; color:var(--accent); font-size:12px; font-weight:700; cursor:pointer;">🔗 Invite Friends</button>
+        </div>
+        <div class="expense-list" id="groupExpenseList"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Floating Action Bar -->
+  <div class="bottom-bar">
+    <button class="action-btn-circle" id="manualAddBtn" title="Add Expense Form">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </button>
+
+    <!-- Big Center Voice Mic -->
+    <button class="mic-btn" id="voiceMicBtn" title="Tap to Speak Expense">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+    </button>
+
+    <button class="action-btn-circle" id="btnGroupInvite" title="Share Room Code">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="18" cy="5" r="3"></circle>
+        <circle cx="6" cy="12" r="3"></circle>
+        <circle cx="18" cy="19" r="3"></circle>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ==============================================================
+       ADVANCED ADD EXPENSE MODAL (With All 4 Split Modes & Multi-Payers)
+  ============================================================== -->
+  <div id="addModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 14px; color:var(--text-main);">Add New Expense</h3>
+
+      <div class="form-group">
+        <label class="form-label">Expense Type</label>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="modalTypePersonal" class="tab-btn active" style="flex:1; border-radius:10px; padding:8px;">Personal</button>
+          <button type="button" id="modalTypeGroup" class="tab-btn" style="flex:1; border-radius:10px; padding:8px;">Group Split</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Total Amount (₹)</label>
+        <input type="number" id="inputAmount" class="form-control" placeholder="e.g. 1500" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Title / Note</label>
+        <input type="text" id="inputTitle" class="form-control" placeholder="e.g. Hotel stay or Dinner" required>
+      </div>
+
+      <!-- GROUP SPLIT ADVANCED SECTION -->
+      <div id="groupSplitFields" style="display: none;">
+        <!-- Payer Selection Mode -->
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label class="form-label" style="margin-bottom:0;">Paid By</label>
+            <button type="button" id="btnToggleMultiPay" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:700; cursor:pointer;">Multiple Payers?</button>
+          </div>
+          <!-- Single Payer Dropdown -->
+          <select id="selectSinglePayer" class="form-control"></select>
+          <!-- Multiple Payers Inputs -->
+          <div id="multiPayContainer" style="display:none; margin-top:8px;"></div>
+        </div>
+
+        <!-- 4 Split Modes Switcher -->
+        <div class="form-group">
+          <label class="form-label">Split Method</label>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="btn-pill active" data-mode="equal">= Equal</button>
+            <button type="button" class="btn-pill" data-mode="exact">₹ Exact</button>
+            <button type="button" class="btn-pill" data-mode="percent">% Percent</button>
+            <button type="button" class="btn-pill" data-mode="shares">1x Shares</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Member Split Breakdown Rows -->
+        <div class="form-group">
+          <label class="form-label">Member Shares Breakdown</label>
+          <div id="splitBreakdownRowsContainer"></div>
+        </div>
+      </div>
+
+      <button type="button" id="btnSaveExpense" class="btn-primary" style="margin-top:6px;">Save &amp; Record</button>
+      <button type="button" id="btnCloseModal" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Create / Switch Group Modal -->
+  <div id="groupModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Manage Groups</h3>
+
+      <div class="form-group">
+        <label class="form-label">Group Name</label>
+        <input type="text" id="newGroupName" class="form-control" placeholder="e.g. Manali Trip or Room 302">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Members (comma separated)</label>
+        <input type="text" id="newGroupMembers" class="form-control" placeholder="You, Rahul, Aman, Pooja">
+      </div>
+
+      <button type="button" id="btnConfirmCreateGroup" class="btn-primary">Create New Group</button>
+
+      <div style="text-align: center; margin: 16px 0; color: var(--text-muted); font-size: 12px; font-weight:600;">─── OR JOIN EXISTING GROUP ───</div>
+
+      <div class="form-group">
+        <label class="form-label">Enter Room Code</label>
+        <input type="text" id="joinRoomCodeInput" class="form-control" placeholder="e.g. GOA713" maxlength="10">
+      </div>
+      <button type="button" id="btnConfirmJoinGroup" class="btn-secondary" style="border-color:var(--accent); color:var(--accent);">Join Room</button>
+
+      <button type="button" id="btnCloseGroupModal" class="btn-secondary" style="margin-top:12px;">Close</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- Application Script -->
+  <script>
+    /* ==============================================================
+       1. DATA STRUCTURES & LOCAL STORAGE
+    ============================================================== */
+    let personalExpenses = JSON.parse(localStorage.getItem('kharacha_personal') || '[]');
+    let currentTab = 'personal';
+
+    // Default sample group with live calculations
+    let currentGroup = JSON.parse(localStorage.getItem('kharacha_active_group') || JSON.stringify({
+      id: 'GOA713',
+      name: '🏖️ Goa Trip 2026',
+      members: ['You', 'Rahul', 'Aman'],
+      expenses: [
+        { id: '1', title: 'Hotel Booking', amount: 3000, paidBy: 'You', splitMode: 'equal', splitData: { 'You': 1000, 'Rahul': 1000, 'Aman': 1000 }, date: new Date().toISOString() },
+        { id: '2', title: 'Dinner at Beach', amount: 1500, paidBy: 'Rahul', splitMode: 'equal', splitData: { 'You': 500, 'Rahul': 500, 'Aman': 500 }, date: new Date().toISOString() }
+      ]
+    }));
+
+    const CATEGORIES = {
+      food: { emoji: '🍔', label: 'Food & Drinks', keywords: ['chai', 'tea', 'coffee', 'khana', 'dinner', 'lunch', 'breakfast', 'pizza', 'burger', 'hotel', 'restaurant', 'dhaba', 'samosa', 'zomato', 'swiggy'] },
+      fuel: { emoji: '⛽', label: 'Fuel & Travel', keywords: ['petrol', 'diesel', 'fuel', 'auto', 'cab', 'uber', 'ola', 'metro', 'fare', 'toll', 'parking', 'bike', 'car', 'flight'] },
+      grocery: { emoji: '🛍️', label: 'Shopping & Grocery', keywords: ['ration', 'doodh', 'milk', 'grocery', 'sabji', 'vegetable', 'fruit', 'shop', 'amazon', 'flipkart', 'kapde'] },
+      bills: { emoji: '🏠', label: 'Bills & Utilities', keywords: ['rent', 'kiraya', 'bijli', 'electricity', 'wifi', 'recharge', 'water', 'gas', 'cylinder'] },
+      entertainment: { emoji: '🎬', label: 'Entertainment', keywords: ['movie', 'cinema', 'party', 'netflix', 'game', 'fun', 'outing', 'club'] },
+      health: { emoji: '💊', label: 'Health & Medical', keywords: ['dawai', 'medicine', 'doctor', 'hospital', 'medical', 'clinic'] }
+    };
+
+    function detectCategory(text) {
+      const lower = text.toLowerCase();
+      for (const [key, data] of Object.entries(CATEGORIES)) {
+        for (const kw of data.keywords) {
+          if (lower.includes(kw)) {
+            return { key, ...data };
+          }
+        }
+      }
+      return { key: 'other', emoji: '💸', label: 'General Expense' };
+    }
+
+    function extractAmount(text) {
+      const match = text.match(/\b\d+(\.\d{1,2})?\b/);
+      return match ? parseFloat(match[0]) : null;
+    }
+
+    /* ==============================================================
+       2. REAL-TIME CLOUD RELAY FOR GROUPS (ntfy.sh Server-Sent Events)
+    ============================================================== */
+    let groupEventSource = null;
+
+    function initGroupSync() {
+      if (groupEventSource) {
+        groupEventSource.close();
+      }
+      const channel = `kharacha_room_${currentGroup.id.toLowerCase()}`;
+      groupEventSource = new EventSource(`https://ntfy.sh/${channel}/sse`);
+
+      groupEventSource.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload && payload.event === 'NEW_EXPENSE' && payload.expense) {
+            const exists = currentGroup.expenses.some(e => e.id === payload.expense.id);
+            if (!exists) {
+              currentGroup.expenses.unshift(payload.expense);
+              saveAndRenderGroup();
+              showToast(`🔔 New group expense: ${payload.expense.title} (₹${payload.expense.amount})`);
+            }
+          }
+        } catch (e) {}
+      };
+    }
+
+    async function broadcastGroupExpense(expense) {
+      const channel = `kharacha_room_${currentGroup.id.toLowerCase()}`;
+      try {
+        await fetch(`https://ntfy.sh/${channel}`, {
+          method: 'POST',
+          body: JSON.stringify({ event: 'NEW_EXPENSE', expense })
+        });
+      } catch (e) {
+        console.warn('Sync broadcast error:', e);
+      }
+    }
+
+    /* ==============================================================
+       3. ADVANCED SPLITWISE SETTLEMENT ALGORITHM (Simplify Debts)
+    ============================================================== */
+    function calculateSettlements() {
+      const balances = {};
+      currentGroup.members.forEach(m => balances[m] = 0);
+
+      currentGroup.expenses.forEach(exp => {
+        const total = exp.amount;
+
+        // 1. Credit the payer(s)
+        if (typeof exp.paidBy === 'object' && exp.paidBy !== null) {
+          // Multiple payers
+          for (const [payer, amt] of Object.entries(exp.paidBy)) {
+            balances[payer] = (balances[payer] || 0) + amt;
+          }
+        } else {
+          // Single payer
+          balances[exp.paidBy] = (balances[exp.paidBy] || 0) + total;
+        }
+
+        // 2. Debit the split shares
+        if (exp.splitData) {
+          for (const [member, share] of Object.entries(exp.splitData)) {
+            balances[member] = (balances[member] || 0) - share;
+          }
+        } else {
+          // Fallback equal split
+          const splitList = exp.splitAmong || currentGroup.members;
+          const share = total / splitList.length;
+          splitList.forEach(m => {
+            balances[m] = (balances[m] || 0) - share;
+          });
+        }
+      });
+
+      // Divide into debtors and creditors
+      const debtors = [];
+      const creditors = [];
+
+      for (const [member, balance] of Object.entries(balances)) {
+        const rounded = Math.round(balance * 100) / 100;
+        if (rounded < -0.5) debtors.push({ member, amount: -rounded });
+        else if (rounded > 0.5) creditors.push({ member, amount: rounded });
+      }
+
+      debtors.sort((a, b) => b.amount - a.amount);
+      creditors.sort((a, b) => b.amount - a.amount);
+
+      const transactions = [];
+      let i = 0, j = 0;
+
+      while (i < debtors.length && j < creditors.length) {
+        const debtor = debtors[i];
+        const creditor = creditors[j];
+        const settleAmount = Math.min(debtor.amount, creditor.amount);
+
+        transactions.push({
+          from: debtor.member,
+          to: creditor.member,
+          amount: Math.round(settleAmount)
+        });
+
+        debtor.amount -= settleAmount;
+        creditor.amount -= settleAmount;
+
+        if (debtor.amount < 0.5) i++;
+        if (creditor.amount < 0.5) j++;
+      }
+
+      return { balances, transactions };
+    }
+
+    /* ==============================================================
+       4. SPEECH RECOGNITION (VOICE ENGINE FOR PERSONAL & SPLIT)
+    ============================================================== */
+    const voiceMicBtn = document.getElementById('voiceMicBtn');
+    const voiceBanner = document.getElementById('voiceBanner');
+    const voiceTranscript = document.getElementById('voiceTranscript');
+    const voiceTags = document.getElementById('voiceTags');
+    const voiceStatus = document.getElementById('voiceStatus');
+
+    let recognition = null;
+    let isListening = false;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'hi-IN';
+
+      recognition.onstart = () => {
+        isListening = true;
+        voiceMicBtn.classList.add('listening');
+        voiceBanner.classList.add('active');
+        voiceStatus.textContent = 'Listening...';
+        voiceTranscript.textContent = currentTab === 'group' ? 'बोलिए... (जैसे: डिनर 1200 राहुल और अमन)' : 'बोलिए... (जैसे: पेट्रोल 500)';
+        voiceTags.innerHTML = '';
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+
+        voiceTranscript.textContent = `"${transcript}"`;
+        const amount = extractAmount(transcript);
+        const cat = detectCategory(transcript);
+
+        voiceTags.innerHTML = '';
+        if (amount) voiceTags.innerHTML += `<span class="v-tag">₹${amount}</span>`;
+        if (cat) voiceTags.innerHTML += `<span class="v-tag">${cat.emoji} ${cat.label}</span>`;
+      };
+
+      recognition.onerror = (err) => {
+        stopListening();
+        showToast('Voice error: ' + (err.error || 'Could not hear'));
+      };
+
+      recognition.onend = () => {
+        stopListening();
+        processVoiceCommand(voiceTranscript.textContent.replace(/"/g, ''));
+      };
+    } else {
+      voiceMicBtn.addEventListener('click', () => {
+        showToast('Voice recognition not supported in this browser.');
+      });
+    }
+
+    function toggleListening() {
+      if (!recognition) return;
+      if (isListening) recognition.stop();
+      else {
+        try { recognition.start(); } catch(e) { recognition.stop(); }
+      }
+    }
+
+    function stopListening() {
+      isListening = false;
+      voiceMicBtn.classList.remove('listening');
+      setTimeout(() => { voiceBanner.classList.remove('active'); }, 1500);
+    }
+
+    function processVoiceCommand(rawText) {
+      const text = rawText.trim();
+      if (!text || text.includes('बोलिए...')) return;
+
+      const amount = extractAmount(text);
+      if (!amount) {
+        showToast('कृपया कीमत भी बोलें (जैसे: 500)');
+        return;
+      }
+
+      const cat = detectCategory(text);
+
+      // Check if it mentions members for split (e.g., "Rahul", "Aman")
+      const lower = text.toLowerCase();
+      const mentionedMembers = [];
+      currentGroup.members.forEach(m => {
+        if (lower.includes(m.toLowerCase())) {
+          mentionedMembers.push(m);
+        }
+      });
+
+      if (currentTab === 'group' || mentionedMembers.length > 0) {
+        // GROUP SPLIT ENTRY
+        if (!mentionedMembers.includes('You')) mentionedMembers.push('You');
+        const splitAmong = mentionedMembers.length > 1 ? mentionedMembers : currentGroup.members;
+
+        let title = text.replace(new RegExp(`\\b${amount}\\b`, 'g'), '').replace(/rupaye|rupee|rs|ka|mein|ko|ke sath|with/gi, '').trim();
+        if (!title) title = cat.label;
+
+        // Equal split calculation
+        const splitData = {};
+        const shareAmt = Math.round((amount / splitAmong.length) * 100) / 100;
+        splitAmong.forEach(m => splitData[m] = shareAmt);
+
+        const newExp = {
+          id: Date.now().toString(),
+          title: title.charAt(0).toUpperCase() + title.slice(1),
+          amount: amount,
+          paidBy: 'You',
+          splitMode: 'equal',
+          splitData: splitData,
+          date: new Date().toISOString()
+        };
+
+        currentGroup.expenses.unshift(newExp);
+        saveAndRenderGroup();
+        broadcastGroupExpense(newExp);
+        showToast(`✅ Split ₹${amount} among ${splitAmong.join(', ')}!`);
+      } else {
+        // PERSONAL EXPENSE ENTRY
+        let title = text.replace(new RegExp(`\\b${amount}\\b`, 'g'), '').replace(/rupaye|rupee|rs|ka|mein|ko/gi, '').trim();
+        if (!title) title = cat.label;
+
+        const newExp = {
+          id: Date.now().toString(),
+          title: title.charAt(0).toUpperCase() + title.slice(1),
+          amount: amount,
+          category: cat.key,
+          emoji: cat.emoji,
+          date: new Date().toISOString()
+        };
+
+        personalExpenses.unshift(newExp);
+        saveAndRenderPersonal();
+        showToast(`✅ ₹${amount} (${cat.emoji} ${newExp.title}) Saved!`);
+      }
+    }
+
+    voiceMicBtn.addEventListener('click', toggleListening);
+
+    /* ==============================================================
+       5. RENDER LOGIC (LIGHT THEME PERSONAL & GROUP)
+    ============================================================== */
+    function saveAndRenderPersonal() {
+      localStorage.setItem('kharacha_personal', JSON.stringify(personalExpenses));
+      const listContainer = document.getElementById('personalExpenseList');
+      listContainer.innerHTML = '';
+
+      let total = 0;
+      let todayTotal = 0;
+      const todayStr = new Date().toDateString();
+
+      if (personalExpenses.length === 0) {
+        listContainer.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); padding: 40px 10px;">
+            <div style="font-size: 40px; margin-bottom: 8px;">🎙️</div>
+            <p style="font-size: 14px; font-weight:600;">कोई पर्सनल खर्च दर्ज नहीं है।</p>
+            <small style="color: var(--accent); font-weight:600;">नीचे माइक बटन दबाकर बोलें!</small>
+          </div>
+        `;
+      } else {
+        personalExpenses.forEach(item => {
+          total += item.amount;
+          const itemDate = new Date(item.date);
+          if (itemDate.toDateString() === todayStr) todayTotal += item.amount;
+
+          const timeFormatted = itemDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          const div = document.createElement('div');
+          div.className = 'expense-item';
+          div.innerHTML = `
+            <div class="item-left">
+              <div class="category-icon">${item.emoji || '💸'}</div>
+              <div>
+                <div class="item-title">${item.title}</div>
+                <div class="item-meta">${timeFormatted} • ${CATEGORIES[item.category]?.label || 'General'}</div>
+              </div>
+            </div>
+            <div>
+              <div class="item-amount">₹${item.amount.toLocaleString('en-IN')}</div>
+              <span class="item-tag">Personal</span>
+            </div>
+          `;
+          listContainer.appendChild(div);
+        });
+      }
+
+      document.getElementById('totalPersonalAmount').textContent = total.toLocaleString('en-IN');
+      document.getElementById('todayAmount').textContent = todayTotal.toLocaleString('en-IN');
+      document.getElementById('totalCount').textContent = personalExpenses.length;
+    }
+
+    function saveAndRenderGroup() {
+      localStorage.setItem('kharacha_active_group', JSON.stringify(currentGroup));
+
+      document.getElementById('currentGroupName').textContent = currentGroup.name;
+      document.getElementById('currentRoomCode').textContent = currentGroup.id;
+      document.getElementById('membersCountText').textContent = `${currentGroup.members.length} Members: ${currentGroup.members.join(', ')}`;
+
+      // Calculate totals
+      let groupTotal = 0;
+      let youPaid = 0;
+      let yourShare = 0;
+
+      currentGroup.expenses.forEach(exp => {
+        groupTotal += exp.amount;
+        // Payer
+        if (typeof exp.paidBy === 'object' && exp.paidBy !== null) {
+          if (exp.paidBy['You']) youPaid += exp.paidBy['You'];
+        } else if (exp.paidBy === 'You') {
+          youPaid += exp.amount;
+        }
+
+        // Share
+        if (exp.splitData && exp.splitData['You']) {
+          yourShare += exp.splitData['You'];
+        } else if (exp.splitAmong && exp.splitAmong.includes('You')) {
+          yourShare += (exp.amount / exp.splitAmong.length);
+        }
+      });
+
+      document.getElementById('groupTotalAmount').textContent = groupTotal.toLocaleString('en-IN');
+      document.getElementById('youPaidAmount').textContent = youPaid.toLocaleString('en-IN');
+      document.getElementById('yourShareAmount').textContent = Math.round(yourShare).toLocaleString('en-IN');
+
+      // Render Settlement summary (Who owes whom)
+      const { transactions } = calculateSettlements();
+      const settleContainer = document.getElementById('settlementsListContainer');
+      settleContainer.innerHTML = '';
+
+      if (transactions.length === 0) {
+        settleContainer.innerHTML = '<div style="color:var(--text-muted); font-size:13px; font-weight:600; padding:10px 0;">🎉 All settled up! No pending debts.</div>';
+      } else {
+        transactions.forEach(t => {
+          const card = document.createElement('div');
+          card.className = 'settle-card';
+          card.innerHTML = `
+            <div class="settle-text">
+              <b>${t.from}</b> owes <b>${t.to}</b>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:15px; font-weight:800; color:var(--accent);">₹${t.amount.toLocaleString('en-IN')}</span>
+              ${t.from === 'You' ? `<button class="settle-btn" onclick="openUpiPay('${t.amount}')">Pay UPI</button>` : ''}
+            </div>
+          `;
+          settleContainer.appendChild(card);
+        });
+      }
+
+      // Render Group Expenses List
+      const listContainer = document.getElementById('groupExpenseList');
+      listContainer.innerHTML = '';
+
+      if (currentGroup.expenses.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:30px;">कोई ग्रुप खर्च नहीं है। माइक दबाकर बोलें!</div>';
+      } else {
+        currentGroup.expenses.forEach(exp => {
+          const div = document.createElement('div');
+          div.className = 'expense-item';
+
+          let payerStr = typeof exp.paidBy === 'object' ? 'Multiple Payers' : `Paid by <b>${exp.paidBy}</b>`;
+          let modeBadge = exp.splitMode ? exp.splitMode.toUpperCase() : 'EQUAL';
+
+          div.innerHTML = `
+            <div class="item-left">
+              <div class="category-icon">👥</div>
+              <div>
+                <div class="item-title">${exp.title}</div>
+                <div class="item-meta">${payerStr} • <span style="color:var(--accent); font-weight:700;">${modeBadge}</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="item-amount">₹${exp.amount.toLocaleString('en-IN')}</div>
+              <span class="item-tag" style="background:var(--warning-light); color:var(--warning);">Group</span>
+            </div>
+          `;
+          listContainer.appendChild(div);
+        });
+      }
+    }
+
+    function openUpiPay(amount) {
+      window.location.href = `upi://pay?pn=Friend&am=${amount}&cu=INR`;
+    }
+
+    /* ==============================================================
+       6. ADVANCED SPLIT MODAL LOGIC (4 Modes: Equal, Exact, Percent, Shares)
+    ============================================================= */
+    let currentSplitMode = 'equal';
+    let isMultiPayMode = false;
+
+    // Split mode pills click
+    document.querySelectorAll('[data-mode]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSplitMode = btn.dataset.mode;
+        recalculateSplitBreakdown();
+      });
+    });
+
+    // Toggle Multi-Payers
+    const btnToggleMultiPay = document.getElementById('btnToggleMultiPay');
+    const selectSinglePayer = document.getElementById('selectSinglePayer');
+    const multiPayContainer = document.getElementById('multiPayContainer');
+
+    btnToggleMultiPay.addEventListener('click', () => {
+      isMultiPayMode = !isMultiPayMode;
+      if (isMultiPayMode) {
+        btnToggleMultiPay.textContent = 'Single Payer?';
+        selectSinglePayer.style.display = 'none';
+        multiPayContainer.style.display = 'block';
+        renderMultiPayInputs();
+      } else {
+        btnToggleMultiPay.textContent = 'Multiple Payers?';
+        selectSinglePayer.style.display = 'block';
+        multiPayContainer.style.display = 'none';
+      }
+    });
+
+    function renderMultiPayInputs() {
+      multiPayContainer.innerHTML = '';
+      currentGroup.members.forEach(m => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;';
+        row.innerHTML = `
+          <span style="font-size:13px; font-weight:600;">${m} Paid:</span>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span>₹</span>
+            <input type="number" class="split-input-box multi-pay-val" data-member="${m}" placeholder="0">
+          </div>
+        `;
+        multiPayContainer.appendChild(row);
+      });
+    }
+
+    // Dynamic Member Split Breakdown Rows
+    const splitBreakdownRowsContainer = document.getElementById('splitBreakdownRowsContainer');
+    const inputAmount = document.getElementById('inputAmount');
+
+    inputAmount.addEventListener('input', recalculateSplitBreakdown);
+
+    function renderSplitBreakdownRows() {
+      splitBreakdownRowsContainer.innerHTML = '';
+      currentGroup.members.forEach(m => {
+        const row = document.createElement('div');
+        row.className = 'split-member-row';
+        row.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" class="split-member-chk" data-member="${m}" checked style="accent-color:var(--accent);">
+            <span class="split-member-name">${m}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span id="unit_${m}" style="font-size:12px; color:var(--text-muted); font-weight:700;">₹</span>
+            <input type="number" class="split-input-box split-member-val" data-member="${m}" value="0">
+          </div>
+        `;
+        splitBreakdownRowsContainer.appendChild(row);
+
+        row.querySelector('.split-member-chk').addEventListener('change', recalculateSplitBreakdown);
+        row.querySelector('.split-member-val').addEventListener('input', onCustomValInput);
+      });
+      recalculateSplitBreakdown();
+    }
+
+    function recalculateSplitBreakdown() {
+      const total = parseFloat(inputAmount.value) || 0;
+      const checkedBoxes = Array.from(document.querySelectorAll('.split-member-chk:checked'));
+      const activeMembers = checkedBoxes.map(c => c.dataset.member);
+
+      document.querySelectorAll('.split-member-row').forEach(row => {
+        const m = row.querySelector('.split-member-chk').dataset.member;
+        const valInput = row.querySelector('.split-member-val');
+        const unitSpan = document.getElementById(`unit_${m}`);
+
+        if (!activeMembers.includes(m)) {
+          valInput.disabled = true;
+          valInput.value = '0';
+          return;
+        }
+        valInput.disabled = false;
+
+        if (currentSplitMode === 'equal') {
+          unitSpan.textContent = '₹';
+          valInput.readOnly = true;
+          valInput.value = activeMembers.length > 0 ? (Math.round((total / activeMembers.length) * 100) / 100) : 0;
+        } else if (currentSplitMode === 'exact') {
+          unitSpan.textContent = '₹';
+          valInput.readOnly = false;
+        } else if (currentSplitMode === 'percent') {
+          unitSpan.textContent = '%';
+          valInput.readOnly = false;
+          if (!valInput.dataset.modified) {
+            valInput.value = activeMembers.length > 0 ? Math.round(100 / activeMembers.length) : 0;
+          }
+        } else if (currentSplitMode === 'shares') {
+          unitSpan.textContent = 'x';
+          valInput.readOnly = false;
+          if (!valInput.dataset.modified) valInput.value = '1';
+        }
+      });
+    }
+
+    function onCustomValInput(e) {
+      e.target.dataset.modified = "true";
+    }
+
+    /* ==============================================================
+       7. SAVE EXPENSE HANDLER (PERSONAL & SPLIT MODES)
+    ============================================================== */
+    document.getElementById('btnSaveExpense').addEventListener('click', () => {
+      const amount = parseFloat(inputAmount.value);
+      const title = document.getElementById('inputTitle').value.trim();
+
+      if (!amount || !title) {
+        showToast('Please enter both amount and title!');
+        return;
+      }
+
+      if (modalMode === 'personal') {
+        const cat = detectCategory(title);
+        personalExpenses.unshift({
+          id: Date.now().toString(),
+          title: title,
+          amount: amount,
+          category: cat.key,
+          emoji: cat.emoji,
+          date: new Date().toISOString()
+        });
+        saveAndRenderPersonal();
+        showToast('Personal expense saved!');
+      } else {
+        // GROUP EXPENSE SAVE
+        let paidByData = selectSinglePayer.value;
+        if (isMultiPayMode) {
+          paidByData = {};
+          let multiSum = 0;
+          document.querySelectorAll('.multi-pay-val').forEach(inp => {
+            const val = parseFloat(inp.value) || 0;
+            if (val > 0) {
+              paidByData[inp.dataset.member] = val;
+              multiSum += val;
+            }
+          });
+          if (Math.abs(multiSum - amount) > 1) {
+            showToast(`Payer sum (₹${multiSum}) must match total ₹${amount}!`);
+            return;
+          }
+        }
+
+        // Calculate Split Shares
+        const splitData = {};
+        const activeBoxes = Array.from(document.querySelectorAll('.split-member-chk:checked'));
+
+        if (currentSplitMode === 'equal') {
+          const share = Math.round((amount / activeBoxes.length) * 100) / 100;
+          activeBoxes.forEach(b => splitData[b.dataset.member] = share);
+        } else if (currentSplitMode === 'exact') {
+          let exactSum = 0;
+          activeBoxes.forEach(b => {
+            const val = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 0;
+            splitData[b.dataset.member] = val;
+            exactSum += val;
+          });
+          if (Math.abs(exactSum - amount) > 1) {
+            showToast(`Split sum (₹${exactSum}) must match total ₹${amount}!`);
+            return;
+          }
+        } else if (currentSplitMode === 'percent') {
+          activeBoxes.forEach(b => {
+            const pct = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 0;
+            splitData[b.dataset.member] = Math.round((amount * (pct / 100)) * 100) / 100;
+          });
+        } else if (currentSplitMode === 'shares') {
+          let totalShares = 0;
+          activeBoxes.forEach(b => {
+            const s = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 1;
+            totalShares += s;
+          });
+          activeBoxes.forEach(b => {
+            const s = parseFloat(b.closest('.split-member-row').querySelector('.split-member-val').value) || 1;
+            splitData[b.dataset.member] = Math.round((amount * (s / totalShares)) * 100) / 100;
+          });
+        }
+
+        const newExp = {
+          id: Date.now().toString(),
+          title: title,
+          amount: amount,
+          paidBy: paidByData,
+          splitMode: currentSplitMode,
+          splitData: splitData,
+          date: new Date().toISOString()
+        };
+
+        currentGroup.expenses.unshift(newExp);
+        saveAndRenderGroup();
+        broadcastGroupExpense(newExp);
+        showToast(`Group expense added (${currentSplitMode.toUpperCase()})!`);
+      }
+
+      inputAmount.value = '';
+      document.getElementById('inputTitle').value = '';
+      addModal.style.display = 'none';
+    });
+
+    /* ==============================================================
+       8. WHATSAPP SUMMARY EXPORT & SHARE
+    ============================================================== */
+    document.getElementById('btnExportWhatsApp').addEventListener('click', () => {
+      const { transactions } = calculateSettlements();
+      let summaryText = `*${currentGroup.name} - Final Expense Settlement*\n`;
+      summaryText += `Room Code: ${currentGroup.id}\n`;
+      summaryText += `Total Group Expense: ₹${document.getElementById('groupTotalAmount').textContent}\n\n`;
+
+      if (transactions.length === 0) {
+        summaryText += `🎉 All debts are settled up!\n`;
+      } else {
+        summaryText += `*Pending Settlements:*\n`;
+        transactions.forEach(t => {
+          summaryText += `👉 *${t.from}* pays *${t.to}*: ₹${t.amount.toLocaleString('en-IN')}\n`;
+        });
+      }
+      summaryText += `\nTracked via Kharacha App`;
+
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(summaryText)}`;
+      window.open(whatsappUrl, '_blank');
+    });
+
+    /* ==============================================================
+       9. MODAL & TAB BINDINGS
+    ============================================================== */
+    const tabPersonal = document.getElementById('tabPersonal');
+    const tabGroup = document.getElementById('tabGroup');
+    const viewPersonal = document.getElementById('viewPersonal');
+    const viewGroup = document.getElementById('viewGroup');
+
+    tabPersonal.addEventListener('click', () => {
+      tabPersonal.classList.add('active');
+      tabGroup.classList.remove('active');
+      viewPersonal.style.display = 'block';
+      viewGroup.style.display = 'none';
+      currentTab = 'personal';
+    });
+
+    tabGroup.addEventListener('click', () => {
+      tabGroup.classList.add('active');
+      tabPersonal.classList.remove('active');
+      viewPersonal.style.display = 'none';
+      viewGroup.style.display = 'block';
+      currentTab = 'group';
+    });
+
+    const addModal = document.getElementById('addModal');
+    const manualAddBtn = document.getElementById('manualAddBtn');
+    const btnCloseModal = document.getElementById('btnCloseModal');
+    const modalTypePersonal = document.getElementById('modalTypePersonal');
+    const modalTypeGroup = document.getElementById('modalTypeGroup');
+    const groupSplitFields = document.getElementById('groupSplitFields');
+    let modalMode = 'personal';
+
+    manualAddBtn.addEventListener('click', () => {
+      modalMode = currentTab;
+      updateModalFields();
+      addModal.style.display = 'flex';
+    });
+
+    btnCloseModal.addEventListener('click', () => {
+      addModal.style.display = 'none';
+    });
+
+    modalTypePersonal.addEventListener('click', () => {
+      modalMode = 'personal';
+      modalTypePersonal.classList.add('active');
+      modalTypeGroup.classList.remove('active');
+      groupSplitFields.style.display = 'none';
+    });
+
+    modalTypeGroup.addEventListener('click', () => {
+      modalMode = 'group';
+      modalTypeGroup.classList.add('active');
+      modalTypePersonal.classList.remove('active');
+      updateModalFields();
+      groupSplitFields.style.display = 'block';
+    });
+
+    function updateModalFields() {
+      if (modalMode === 'group') {
+        modalTypeGroup.classList.add('active');
+        modalTypePersonal.classList.remove('active');
+        groupSplitFields.style.display = 'block';
+
+        // Single Payer Select
+        selectSinglePayer.innerHTML = '';
+        currentGroup.members.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = m;
+          selectSinglePayer.appendChild(opt);
+        });
+
+        renderSplitBreakdownRows();
+      } else {
+        modalTypePersonal.classList.add('active');
+        modalTypeGroup.classList.remove('active');
+        groupSplitFields.style.display = 'none';
+      }
+    }
+
+    // Group Switch Modal
+    const groupModal = document.getElementById('groupModal');
+    const btnSwitchGroup = document.getElementById('btnSwitchGroup');
+    const btnCloseGroupModal = document.getElementById('btnCloseGroupModal');
+
+    btnSwitchGroup.addEventListener('click', () => { groupModal.style.display = 'flex'; });
+    btnCloseGroupModal.addEventListener('click', () => { groupModal.style.display = 'none'; });
+
+    document.getElementById('btnConfirmCreateGroup').addEventListener('click', () => {
+      const name = document.getElementById('newGroupName').value.trim();
+      const membersRaw = document.getElementById('newGroupMembers').value.trim();
+
+      if (!name) {
+        showToast('Please enter group name!');
+        return;
+      }
+
+      let members = membersRaw.split(',').map(m => m.trim()).filter(m => m);
+      if (!members.includes('You')) members.unshift('You');
+      if (members.length < 2) {
+        showToast('Add at least one more member!');
+        return;
+      }
+
+      const randomCode = 'ROOM' + Math.floor(100 + Math.random() * 900);
+      currentGroup = {
+        id: randomCode,
+        name: name,
+        members: members,
+        expenses: []
+      };
+
+      saveAndRenderGroup();
+      initGroupSync();
+      groupModal.style.display = 'none';
+      showToast(`Group "${name}" created! Code: ${randomCode}`);
+    });
+
+    document.getElementById('btnConfirmJoinGroup').addEventListener('click', () => {
+      const code = document.getElementById('joinRoomCodeInput').value.trim().toUpperCase();
+      if (!code) {
+        showToast('Enter a valid room code!');
+        return;
+      }
+
+      currentGroup = {
+        id: code,
+        name: `Group (${code})`,
+        members: ['You', 'Friend 1', 'Friend 2'],
+        expenses: []
+      };
+
+      saveAndRenderGroup();
+      initGroupSync();
+      groupModal.style.display = 'none';
+      showToast(`Joined Room: ${code}!`);
+    });
+
+    // Share link
+    function shareGroup() {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?room=${currentGroup.id}`;
+      const text = `Join my Kharacha Expense Group "${currentGroup.name}"! Room Code: ${currentGroup.id}\nLink: ${shareUrl}`;
+
+      if (navigator.share) {
+        navigator.share({ title: currentGroup.name, text: text });
+      } else {
+        navigator.clipboard.writeText(text);
+        showToast('Invite text copied to clipboard!');
+      }
+    }
+
+    document.getElementById('btnShareGroupLink').addEventListener('click', shareGroup);
+    document.getElementById('btnGroupInvite').addEventListener('click', shareGroup);
+    document.getElementById('currentRoomCode').addEventListener('click', () => {
+      navigator.clipboard.writeText(currentGroup.id);
+      showToast(`Room Code ${currentGroup.id} copied!`);
+    });
+
+    // Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    // Auto-detect Room from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomParam = urlParams.get('room');
+    if (roomParam && roomParam !== currentGroup.id) {
+      currentGroup.id = roomParam.toUpperCase();
+      currentGroup.name = `Room ${currentGroup.id}`;
+    }
+
+    // Initial Start
+    saveAndRenderPersonal();
+    saveAndRenderGroup();
+    initGroupSync();
+  </script>
+</body>
+</html>

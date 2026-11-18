@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kharacha</string>
+    <string name="title_activity_main">Kharacha</string>
+    <string name="package_name">com.kharacha.app</string>
+    <string name="custom_url_scheme">com.kharacha.app</string>
+</resources>
