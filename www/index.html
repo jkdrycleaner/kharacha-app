@@ -737,6 +737,21 @@
       font-weight: 800;
     }
 
+    .voice-advanced-options {
+      margin: 10px 0;
+      padding: 10px 12px;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      background: #F8FAFC;
+    }
+
+    .voice-advanced-options summary {
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     @media (max-width: 540px) {
       .top-tab-switcher { gap: 0; }
       .tab-btn { padding: 6px 9px; font-size: 11px; }
@@ -1152,8 +1167,8 @@
 
   <div id="voiceConfirmModal" class="modal-backdrop" style="display: none;">
     <div class="modal-card">
-      <div style="font-size:24px; text-align:center; margin-bottom:4px;">🤔</div>
-      <h3 style="font-size: 17px; font-weight: 800; text-align:center; margin-bottom: 6px;">Confirm Voice Expense</h3>
+      <div style="font-size:24px; text-align:center; margin-bottom:4px;">🎙️</div>
+      <h3 style="font-size: 17px; font-weight: 800; text-align:center; margin-bottom: 6px;">One detail needed</h3>
       <p id="voiceConfirmSubtext" style="font-size: 12px; color: var(--text-muted); text-align:center; margin-bottom: 16px;">किसमें और कैसे स्प्लिट करना है?</p>
 
       <!-- Voice AI Interactive Prompt Banner -->
@@ -1170,50 +1185,64 @@
         </button>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Expense Scope (कहाँ जोड़ना है?)</label>
-        <div style="display:flex; gap:8px;">
-          <button type="button" id="btnVoiceScopePersonal" class="tab-btn" style="flex:1; border-radius:10px; padding:10px;">👤 Personal Expense</button>
-          <button type="button" id="btnVoiceScopeGroup" class="tab-btn active" style="flex:1; border-radius:10px; padding:10px;">👥 Split in Group</button>
+      <div id="voiceMissingFields" style="display:none;">
+        <div class="form-group" id="voiceMissingAmountGroup" style="display:none;">
+          <label class="form-label" for="voiceMissingAmount">Amount (₹)</label>
+          <input type="number" id="voiceMissingAmount" class="form-control" min="0.01" step="0.01" placeholder="Speak or enter amount">
+        </div>
+        <div class="form-group" id="voiceMissingTitleGroup" style="display:none;">
+          <label class="form-label" for="voiceMissingTitle">Expense name</label>
+          <input type="text" id="voiceMissingTitle" class="form-control" placeholder="Speak or enter what you bought">
         </div>
       </div>
 
-      <div class="form-group" id="voiceGroupSplitSection">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <label class="form-label" style="margin-bottom:0;">Split Among Members (किनमें बांटना है?)</label>
-          <button type="button" id="btnVoiceSelectAllMembers" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:700; cursor:pointer;">Select All</button>
+      <details id="voiceAdvancedDetails" class="voice-advanced-options">
+        <summary>Edit category, payment, date or split</summary>
+        <div class="form-group" style="margin-top:12px;">
+          <label class="form-label">Expense Scope (कहाँ जोड़ना है?)</label>
+          <div style="display:flex; gap:8px;">
+            <button type="button" id="btnVoiceScopePersonal" class="tab-btn" style="flex:1; border-radius:10px; padding:10px;">👤 Personal</button>
+            <button type="button" id="btnVoiceScopeGroup" class="tab-btn active" style="flex:1; border-radius:10px; padding:10px;">👥 Group Split</button>
+          </div>
         </div>
-        <div id="voiceMembersCheckboxContainer" style="display:flex; flex-direction:column; gap:6px; background:#F8FAFC; padding:10px; border-radius:8px; border:1px solid var(--card-border);"></div>
-      </div>
 
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <div class="form-group">
-          <label class="form-label">Category</label>
-          <select id="voiceCategorySelect" class="form-control"></select>
+        <div class="form-group" id="voiceGroupSplitSection">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label class="form-label" style="margin-bottom:0;">Split among</label>
+            <button type="button" id="btnVoiceSelectAllMembers" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:700; cursor:pointer;">Select All</button>
+          </div>
+          <div id="voiceMembersCheckboxContainer" style="display:flex; flex-direction:column; gap:6px; background:#F8FAFC; padding:10px; border-radius:8px; border:1px solid var(--card-border);"></div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Payment Mode</label>
-          <select id="voicePaymentModeSelect" class="form-control">
-            <option value="UPI">📱 UPI</option>
-            <option value="Cash">💵 Cash</option>
-            <option value="Card">💳 Card</option>
-            <option value="NetBanking">🏦 NetBanking</option>
-          </select>
-        </div>
-      </div>
 
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <div class="form-group">
-          <label class="form-label">Date (तारीख)</label>
-          <input type="date" id="voiceInputDate" class="form-control">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="voiceCategorySelect" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <select id="voicePaymentModeSelect" class="form-control">
+              <option value="UPI">📱 UPI</option>
+              <option value="Cash">💵 Cash</option>
+              <option value="Card">💳 Card</option>
+              <option value="NetBanking">🏦 NetBanking</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Remark / Note</label>
-          <input type="text" id="voiceInputRemark" class="form-control" placeholder="e.g. Chai nashta">
-        </div>
-      </div>
 
-      <button type="button" id="btnConfirmVoiceSave" class="btn-primary" style="margin-top:8px;">Confirm &amp; Save Expense</button>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div class="form-group">
+            <label class="form-label">Date (तारीख)</label>
+            <input type="date" id="voiceInputDate" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Remark / Note</label>
+            <input type="text" id="voiceInputRemark" class="form-control" placeholder="e.g. Chai nashta">
+          </div>
+        </div>
+      </details>
+
+      <button type="button" id="btnConfirmVoiceSave" class="btn-primary" style="margin-top:8px;">Save Expense</button>
       <button type="button" id="btnCancelVoiceModal" class="btn-secondary">Cancel</button>
     </div>
   </div>
@@ -1250,6 +1279,7 @@
   <div id="toast"></div>
 
   <!-- Application Script -->
+  <script src="voice-plugins.js"></script>
   <script>
     /* ==============================================================
        1. DATA STRUCTURES & LOCAL STORAGE
@@ -1332,9 +1362,65 @@
       return 'UPI';
     }
 
+    const voiceNumberWords = {
+      zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9,
+      ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16,
+      seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50,
+      sixty: 60, seventy: 70, eighty: 80, ninety: 90,
+      ek: 1, eka: 1, do: 2, teen: 3, tin: 3, char: 4, chaar: 4, paanch: 5, panch: 5,
+      chhe: 6, che: 6, saat: 7, sat: 7, aath: 8, nau: 9, das: 10, gyarah: 11, barah: 12,
+      terah: 13, chaudah: 14, pandrah: 15, solah: 16, satrah: 17, atharah: 18, unnis: 19,
+      bees: 20, tees: 30, chalis: 40, pachas: 50, sattar: 70, assi: 80, nabbe: 90,
+      'शून्य': 0, 'एक': 1, 'दो': 2, 'तीन': 3, 'चार': 4, 'पांच': 5, 'पाँच': 5, 'छह': 6,
+      'छः': 6, 'सात': 7, 'आठ': 8, 'नौ': 9, 'दस': 10, 'ग्यारह': 11, 'बारह': 12, 'तेरह': 13,
+      'चौदह': 14, 'पंद्रह': 15, 'सोलह': 16, 'सत्रह': 17, 'अठारह': 18, 'उन्नीस': 19,
+      'बीस': 20, 'तीस': 30, 'चालीस': 40, 'पचास': 50, 'साठ': 60, 'सत्तर': 70, 'अस्सी': 80, 'नब्बे': 90
+    };
+
+    const voiceNumberTokenPattern = Object.keys(voiceNumberWords)
+      .sort((a, b) => b.length - a.length)
+      .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .join('|');
+
     function extractAmount(text) {
-      const match = text.match(/\b\d+(\.\d{1,2})?\b/);
-      return match ? parseFloat(match[0]) : null;
+      const match = text.match(/\b\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?\b|\b\d+(?:\.\d{1,2})?\b/);
+      if (match) return parseFloat(match[0].replace(/,/g, ''));
+
+      const tokens = (text.toLowerCase().match(/[\p{L}\p{M}]+/gu) || [])
+        .map(token => token.normalize('NFC'));
+      let total = 0;
+      let current = 0;
+      let foundNumber = false;
+      let inNumber = false;
+      tokens.forEach(token => {
+        if (Object.prototype.hasOwnProperty.call(voiceNumberWords, token)) {
+          current += voiceNumberWords[token];
+          foundNumber = true;
+          inNumber = true;
+        } else if (['hundred', 'sau', 'सौ'].includes(token)) {
+          current = (current || 1) * 100;
+          foundNumber = true;
+          inNumber = true;
+        } else if (['thousand', 'hazaar', 'hazar', 'हजार', 'हज़ार'].includes(token)) {
+          total += (current || 1) * 1000;
+          current = 0;
+          foundNumber = true;
+          inNumber = true;
+        } else if (['lakh', 'lac', 'लाख'].includes(token)) {
+          total += (current || 1) * 100000;
+          current = 0;
+          foundNumber = true;
+          inNumber = true;
+        } else if (['crore', 'करोड़', 'करोड'].includes(token)) {
+          total += (current || 1) * 10000000;
+          current = 0;
+          foundNumber = true;
+          inNumber = true;
+        } else if (inNumber && !['rupee', 'rupees', 'rupaye', 'rs', 'रुपये', 'रुपया'].includes(token)) {
+          inNumber = false;
+        }
+      });
+      return foundNumber ? total + current : null;
     }
 
     /* ==============================================================
@@ -1459,14 +1545,38 @@
 
     let recognition = null;
     let isListening = false;
+    let isListeningForReply = false;
+    let latestTranscript = '';
+    const nativeVoicePlugins = window.Capacitor
+      && typeof window.Capacitor.isNativePlatform === 'function'
+      && window.Capacitor.isNativePlatform()
+      ? window.KharachaVoicePlugins
+      : null;
+    const nativeSpeechRecognition = nativeVoicePlugins && nativeVoicePlugins.SpeechRecognition;
+    const nativeTextToSpeech = nativeVoicePlugins && nativeVoicePlugins.TextToSpeech;
+    let speechRequestId = 0;
 
-    
     /* ==============================================================
        AI CONVERSATIONAL VOICE ASSISTANT (TTS & STT INTERACTION)
     ============================================================== */
     function speakText(text, onComplete) {
+      const requestId = ++speechRequestId;
+      if (nativeTextToSpeech) {
+        nativeTextToSpeech.speak({ text, lang: 'hi-IN', rate: 0.95, pitch: 1, volume: 1 })
+          .then(() => {
+            if (onComplete) onComplete();
+          })
+          .catch(error => {
+            console.error('Native text-to-speech failed:', error);
+            voiceAssistantHelp.textContent = 'Awaaz nahi chal saki. Sawaal padhkar mic dabayein.';
+            showToast('Voice output unavailable. Please check your phone speech settings.');
+          });
+        return;
+      }
+
       if (!('speechSynthesis' in window)) {
-        if (onComplete) onComplete();
+        voiceAssistantHelp.textContent = 'Awaaz support nahi hai. Sawaal padhkar mic dabayein.';
+        showToast('Voice output is not supported on this device.');
         return;
       }
       window.speechSynthesis.cancel();
@@ -1483,35 +1593,65 @@
       utterance.onend = () => {
         if (onComplete) onComplete();
       };
-      utterance.onerror = () => {
-        if (onComplete) onComplete();
+      utterance.onerror = event => {
+        if (requestId !== speechRequestId || event.error === 'interrupted' || event.error === 'canceled') return;
+        console.error('Browser text-to-speech failed:', event.error);
+        voiceAssistantHelp.textContent = 'Awaaz nahi chal saki. Sawaal padhkar mic dabayein.';
+        showToast('Voice output failed. Please check your speech settings.');
       };
       window.speechSynthesis.speak(utterance);
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (SpeechRecognition) {
+    function updateListeningUI() {
+      isListening = true;
+      latestTranscript = '';
+      voiceMicBtn.classList.add('listening');
+      voiceBanner.classList.add('active');
+      voiceStatus.textContent = 'Listening...';
+      voiceTranscript.textContent = currentTab === 'group'
+        ? 'बोलिए... जैसे: डिनर 1200 राहुल के साथ'
+        : 'बोलिए... जैसे: पेट्रोल 500 Cash';
+      voiceTags.innerHTML = '';
+    }
+
+    function processRecognizedTranscript(spoken) {
+      const text = spoken.trim();
+      if (!text) {
+        if (isListeningForReply) {
+          isListeningForReply = false;
+          showToast('Awaaz samajh nahi aayi. Mic dabakar dobara boliye.');
+          return;
+        }
+        showToast('Awaaz samajh nahi aayi. Mic dabakar dobara boliye.');
+        return;
+      }
+      if (isListeningForReply) {
+        isListeningForReply = false;
+        handleVoiceReply(text);
+      } else {
+        processVoiceCommand(text);
+      }
+    }
+
+    if (SpeechRecognition && !nativeSpeechRecognition) {
       recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = 'hi-IN';
 
       recognition.onstart = () => {
-        isListening = true;
-        voiceMicBtn.classList.add('listening');
-        voiceBanner.classList.add('active');
-        voiceStatus.textContent = 'Listening...';
-        voiceTranscript.textContent = currentTab === 'group' ? 'बोलिए... (जैसे: डिनर 1200 राहुल और अमन UPI)' : 'बोलिए... (जैसे: पेट्रोल 500 Cash)';
-        voiceTags.innerHTML = '';
+        updateListeningUI();
       };
 
       recognition.onresult = (event) => {
         let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+        for (let i = 0; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
         }
 
+        latestTranscript = transcript;
         voiceTranscript.textContent = `"${transcript}"`;
         const amount = extractAmount(transcript);
         const cat = detectCategory(transcript);
@@ -1525,30 +1665,75 @@
 
       recognition.onerror = (err) => {
         stopListening();
+        isListeningForReply = false;
         showToast('Voice error: ' + (err.error || 'Could not hear'));
       };
 
       recognition.onend = () => {
         stopListening();
-        const spoken = voiceTranscript.textContent.replace(/"/g, '').trim();
-        if (isListeningForReply) {
-          isListeningForReply = false;
-          handleVoiceReply(spoken);
-        } else {
-          processVoiceCommand(spoken);
-        }
+        processRecognizedTranscript(latestTranscript);
       };
-    } else {
-      voiceMicBtn.addEventListener('click', () => {
-        showToast('Voice recognition not supported in this browser.');
-      });
     }
 
-    function toggleListening() {
-      if (!recognition) return;
-      if (isListening) recognition.stop();
-      else {
-        try { recognition.start(); } catch(e) { recognition.stop(); }
+    async function startNativeRecognition() {
+      try {
+        const permissions = await nativeSpeechRecognition.requestPermissions();
+        if (permissions.speechRecognition !== 'granted') {
+          isListeningForReply = false;
+          showToast('Microphone permission is needed for voice entry.');
+          return;
+        }
+        const availability = await nativeSpeechRecognition.available();
+        if (!availability.available) {
+          isListeningForReply = false;
+          showToast('Speech recognition is not available on this device.');
+          return;
+        }
+        updateListeningUI();
+        const result = await nativeSpeechRecognition.start({
+          language: 'hi-IN',
+          maxResults: 1,
+          partialResults: false,
+          popup: false
+        });
+        processRecognizedTranscript(result.matches && result.matches[0] || '');
+      } catch (error) {
+        console.error('Native speech recognition failed:', error);
+        isListeningForReply = false;
+        showToast('Voice input failed. Please check microphone and speech-service settings.');
+      } finally {
+        stopListening();
+      }
+    }
+
+    async function toggleListening() {
+      if (nativeSpeechRecognition) {
+        if (isListening) {
+          try {
+            await nativeSpeechRecognition.stop();
+          } catch (error) {
+            console.error('Could not stop native speech recognition:', error);
+            showToast('Could not stop the microphone. Try again.');
+          }
+        } else {
+          await startNativeRecognition();
+        }
+        return;
+      }
+      if (!recognition) {
+        isListeningForReply = false;
+        showToast('Speech recognition is not supported. Try Chrome or check phone speech services.');
+        return;
+      }
+      if (isListening) {
+        recognition.stop();
+      } else {
+        try {
+          recognition.start();
+        } catch (error) {
+          console.error('Could not start browser speech recognition:', error);
+          showToast('Could not start the microphone. Tap again.');
+        }
       }
     }
 
@@ -1567,8 +1752,14 @@
     const voiceMembersCheckboxContainer = document.getElementById('voiceMembersCheckboxContainer');
     const btnConfirmVoiceSave = document.getElementById('btnConfirmVoiceSave');
     const btnCancelVoiceModal = document.getElementById('btnCancelVoiceModal');
+    const voiceMissingFields = document.getElementById('voiceMissingFields');
+    const voiceMissingAmountGroup = document.getElementById('voiceMissingAmountGroup');
+    const voiceMissingAmount = document.getElementById('voiceMissingAmount');
+    const voiceMissingTitleGroup = document.getElementById('voiceMissingTitleGroup');
+    const voiceMissingTitle = document.getElementById('voiceMissingTitle');
+    const voiceAdvancedDetails = document.getElementById('voiceAdvancedDetails');
 
-    let voiceSelectedScope = 'group';
+    let voiceSelectedScope = 'personal';
     const voiceInputDate = document.getElementById('voiceInputDate');
     const voicePaymentModeSelect = document.getElementById('voicePaymentModeSelect');
     const voiceCategorySelect = document.getElementById('voiceCategorySelect');
@@ -1578,7 +1769,7 @@
     const voiceAssistantHelp = document.getElementById('voiceAssistantHelp');
     const btnVoiceReplyMic = document.getElementById('btnVoiceReplyMic');
 
-    let voiceConvStage = 'scope'; // 'scope', 'members', 'paymode', 'remark', 'confirm'
+    let voiceConvStage = '';
 
     btnVoiceScopePersonal.addEventListener('click', () => {
       voiceSelectedScope = 'personal';
@@ -1594,262 +1785,347 @@
       voiceGroupSplitSection.style.display = 'block';
     });
 
-    if (btnVoiceSelectAllMembers) {
-      btnVoiceSelectAllMembers.addEventListener('click', () => {
-        const boxes = voiceMembersCheckboxContainer.querySelectorAll('input');
-        const allChecked = Array.from(boxes).every(b => b.checked);
-        boxes.forEach(b => b.checked = !allChecked);
-        btnVoiceSelectAllMembers.textContent = allChecked ? 'Select All' : 'Deselect All';
+    btnVoiceSelectAllMembers.addEventListener('click', () => {
+      const boxes = Array.from(voiceMembersCheckboxContainer.querySelectorAll('input'));
+      const allChecked = boxes.every(box => box.checked);
+      boxes.forEach(box => { box.checked = !allChecked; });
+      btnVoiceSelectAllMembers.textContent = allChecked ? 'Select All' : 'Deselect All';
+    });
+
+    function renderVoiceMemberChoices(selectedMembers) {
+      voiceMembersCheckboxContainer.replaceChildren();
+      const selected = new Set(selectedMembers);
+      const members = currentGroup.members.includes('You')
+        ? currentGroup.members
+        : ['You', ...currentGroup.members];
+      members.forEach(member => {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-main); font-weight:600; cursor:pointer;';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = member;
+        checkbox.checked = selected.has(member);
+        checkbox.style.accentColor = 'var(--accent)';
+        const name = document.createTextNode(member);
+        label.append(checkbox, name);
+        voiceMembersCheckboxContainer.appendChild(label);
       });
+    }
+
+    function stopVoiceOutput() {
+      speechRequestId++;
+      if (nativeTextToSpeech) {
+        nativeTextToSpeech.stop().catch(error => {
+          console.error('Could not stop native speech output:', error);
+        });
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
     }
 
     btnCancelVoiceModal.addEventListener('click', () => {
       voiceConfirmModal.style.display = 'none';
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      stopVoiceOutput();
       pendingVoiceData = null;
+      isListeningForReply = false;
     });
 
-    btnConfirmVoiceSave.addEventListener('click', () => {
-      if (!pendingVoiceData) return;
+    voiceMissingAmount.addEventListener('input', () => {
+      if (pendingVoiceData) pendingVoiceData.amount = voiceMissingAmount.value ? Number(voiceMissingAmount.value) : null;
+    });
+    voiceMissingTitle.addEventListener('input', () => {
+      if (pendingVoiceData) {
+        pendingVoiceData.title = voiceMissingTitle.value.trim();
+        pendingVoiceData.cat = detectCategory(pendingVoiceData.title);
+        voiceCategorySelect.value = pendingVoiceData.cat.key || '';
+      }
+    });
 
-      const chosenDate = voiceInputDate.value ? new Date(voiceInputDate.value + 'T12:00:00').toISOString() : new Date().toISOString();
-      const chosenPay = voicePaymentModeSelect ? voicePaymentModeSelect.value : (pendingVoiceData.pay || 'UPI');
-      const chosenCatKey = voiceCategorySelect ? voiceCategorySelect.value : pendingVoiceData.cat.key;
-      const catObj = CATEGORIES[chosenCatKey] || pendingVoiceData.cat;
+    function updateVoiceDraftSummary() {
+      if (!pendingVoiceData) return;
+      const amount = pendingVoiceData.amount ? `₹${pendingVoiceData.amount}` : 'Amount missing';
+      const title = pendingVoiceData.title || 'Expense name missing';
+      voiceConfirmSubtext.textContent = `${amount} · ${title}`;
+      voiceMissingAmount.value = pendingVoiceData.amount || '';
+      voiceMissingTitle.value = pendingVoiceData.title || '';
+      voiceMissingAmountGroup.style.display = pendingVoiceData.amount ? 'none' : 'block';
+      voiceMissingTitleGroup.style.display = pendingVoiceData.title ? 'none' : 'block';
+      voiceMissingFields.style.display = (!pendingVoiceData.amount || !pendingVoiceData.title) ? 'block' : 'none';
+    }
+
+    function savePendingVoiceExpense() {
+      if (!pendingVoiceData) return;
+      const amount = Number(pendingVoiceData.amount);
+      const title = String(pendingVoiceData.title || '').trim();
+      if (!Number.isFinite(amount) || amount <= 0 || !title) {
+        if (!Number.isFinite(amount) || amount <= 0) pendingVoiceData.amount = null;
+        if (!title) pendingVoiceData.title = '';
+        voiceConfirmModal.style.display = 'flex';
+        updateVoiceDraftSummary();
+        askForMissingVoiceData();
+        return;
+      }
+
+      const chosenDate = voiceInputDate.value
+        ? new Date(voiceInputDate.value + 'T12:00:00').toISOString()
+        : new Date().toISOString();
+      const chosenPay = voicePaymentModeSelect.value || pendingVoiceData.pay || 'UPI';
+      const chosenCategory = voiceCategorySelect.value;
+      const catObj = CATEGORIES[chosenCategory] || pendingVoiceData.cat || detectCategory(title);
       const chosenRemark = voiceInputRemark.value.trim();
 
       if (voiceSelectedScope === 'personal') {
-        const newExp = {
+        const expense = {
           id: Date.now().toString(),
-          title: pendingVoiceData.title,
-          amount: pendingVoiceData.amount,
+          title,
+          amount,
           paymentMode: chosenPay,
           category: catObj.key || 'other',
           emoji: catObj.emoji || '💸',
           date: chosenDate,
           remark: chosenRemark
         };
-        personalExpenses.unshift(newExp);
+        personalExpenses.unshift(expense);
         saveAndRenderPersonal();
-        showToast(`✅ Personal: ₹${newExp.amount} (${newExp.title} • ${chosenPay}) Saved!`);
-        speakText(`Personal expense saved.`);
+        showToast(`Personal expense saved: ₹${amount} · ${title}`);
+        speakText('व्यक्तिगत खर्च सेव हो गया।');
       } else {
-        const checkedMembers = Array.from(voiceMembersCheckboxContainer.querySelectorAll('input:checked')).map(i => i.value);
+        const checkedMembers = Array.from(voiceMembersCheckboxContainer.querySelectorAll('input:checked'))
+          .map(input => input.value);
         if (checkedMembers.length === 0) {
-          showToast('Select at least one member to split!');
-          speakText('Kripya kam se kam ek dost select karein');
+          pendingVoiceData.missingMembers = true;
+          voiceConfirmModal.style.display = 'flex';
+          voiceAdvancedDetails.open = true;
+          voiceAssistantQuestion.textContent = 'किन दोस्तों के साथ खर्च बाँटना है?';
+          voiceAssistantHelp.textContent = 'दोस्तों के नाम बोलिए, जैसे राहुल और अमन।';
+          speakText('किन दोस्तों के साथ खर्च बाँटना है?', startReplyListening);
           return;
         }
 
         const splitData = {};
-        const shareAmt = pendingVoiceData.amount / checkedMembers.length;
-        checkedMembers.forEach(m => splitData[m] = shareAmt);
-        balanceRoundedSplit(pendingVoiceData.amount, splitData, checkedMembers);
-
-        const newExp = {
+        checkedMembers.forEach(member => { splitData[member] = amount / checkedMembers.length; });
+        balanceRoundedSplit(amount, splitData, checkedMembers);
+        const expense = {
           id: Date.now().toString(),
-          title: pendingVoiceData.title,
-          amount: pendingVoiceData.amount,
+          title,
+          amount,
           paidBy: 'You',
           paymentMode: chosenPay,
           splitMode: 'equal',
-          splitData: splitData,
+          splitData,
           category: catObj.key || 'other',
           emoji: catObj.emoji || '💸',
           date: chosenDate,
           remark: chosenRemark
         };
-        currentGroup.expenses.unshift(newExp);
+        currentGroup.expenses.unshift(expense);
         saveAndRenderGroup();
         broadcastGroupState();
-        showToast(`✅ Split ₹${newExp.amount} (${chosenPay}) among ${checkedMembers.join(', ')}!`);
-        speakText(`₹${newExp.amount} split record ho gaya.`);
+        showToast(`Split saved: ₹${amount} · ${checkedMembers.join(', ')}`);
+        speakText('ग्रुप का खर्च सेव हो गया।');
       }
 
       voiceConfirmModal.style.display = 'none';
       pendingVoiceData = null;
-    });
+      isListeningForReply = false;
+    }
 
-    // Start Interactive Voice Flow Step
-    function promptNextVoiceStage() {
-      if (voiceConvStage === 'scope') {
-        const q = "Personal kharcha hai ya Group me Split karna hai?";
-        voiceAssistantQuestion.textContent = `"${q}"`;
-        voiceAssistantHelp.textContent = 'Boliye: "Personal" ya "Split"';
-        speakText(q, () => startReplyListening());
-      } else if (voiceConvStage === 'members') {
-        if (voiceSelectedScope === 'personal' || currentGroup.members.length <= 1) {
-          voiceConvStage = 'paymode';
-          promptNextVoiceStage();
-          return;
-        }
-        const q = "Kin kin dosto me split karna hai?";
-        voiceAssistantQuestion.textContent = `"${q}"`;
-        voiceAssistantHelp.textContent = 'Dosto ke naam boliye ya "Sabhi"';
-        speakText(q, () => startReplyListening());
-      } else if (voiceConvStage === 'paymode') {
-        const q = "Payment mode kya tha? UPI ya Cash?";
-        voiceAssistantQuestion.textContent = `"${q}"`;
-        voiceAssistantHelp.textContent = 'Boliye: "UPI", "Cash", ya "Card"';
-        speakText(q, () => startReplyListening());
-      } else if (voiceConvStage === 'confirm') {
-        const q = "Kya expense confirm karke save kar doon?";
-        voiceAssistantQuestion.textContent = `"${q}"`;
-        voiceAssistantHelp.textContent = 'Boliye "Haan" ya "Save"';
-        speakText(q, () => startReplyListening());
+    btnConfirmVoiceSave.addEventListener('click', savePendingVoiceExpense);
+
+    function askForMissingVoiceData() {
+      if (!pendingVoiceData) return;
+      const missingAmount = !pendingVoiceData.amount;
+      const missingTitle = !pendingVoiceData.title;
+      const missingMembers = pendingVoiceData.missingMembers;
+      let question = '';
+
+      if (missingAmount && missingTitle) {
+        voiceConvStage = 'amount-title';
+        question = 'खर्च कितने रुपये का था और किस चीज़ के लिए था?';
+        voiceAssistantHelp.textContent = 'रकम और खर्चे का नाम एक साथ बोलिए।';
+      } else if (missingAmount) {
+        voiceConvStage = 'amount';
+        question = 'इस खर्च की रकम कितनी थी?';
+        voiceAssistantHelp.textContent = 'रकम बोलिए, जैसे पाँच सौ रुपये।';
+      } else if (missingTitle) {
+        voiceConvStage = 'title';
+        question = 'यह खर्च किस चीज़ के लिए था?';
+        voiceAssistantHelp.textContent = 'खर्च का नाम बोलिए, जैसे डिनर।';
+      } else if (missingMembers) {
+        voiceConvStage = 'members';
+        question = 'किन दोस्तों के साथ खर्च बाँटना है?';
+        voiceAssistantHelp.textContent = 'दोस्तों के नाम बोलिए, जैसे राहुल और अमन।';
+      } else {
+        savePendingVoiceExpense();
+        return;
       }
+
+      voiceAssistantQuestion.textContent = question;
+      speakText(question, startReplyListening);
     }
 
     function startReplyListening() {
-      if (!recognition) return;
-      try {
-        isListeningForReply = true;
-        recognition.start();
-      } catch(e) {}
+      isListeningForReply = true;
+      toggleListening();
     }
 
-    let isListeningForReply = false;
-    if (btnVoiceReplyMic) {
-      btnVoiceReplyMic.addEventListener('click', () => {
-        promptNextVoiceStage();
+    btnVoiceReplyMic.addEventListener('click', startReplyListening);
+
+    function cleanVoiceTitle(text, amount) {
+      let title = text;
+      if (amount) {
+        title = title.replace(/\b\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?\b|\b\d+(?:\.\d{1,2})?\b/, ' ');
+      }
+      title = title.replace(/\b(?:rupaye|rupee|rupees|rs|inr|ka|mein|ko|ke\s+sath|ke\s+saath|with|upi|cash|card|netbanking|split|divide|among|barabar|sabhi|sab|doston|dosto|personal|group|friends?|me|and|aur|please|spent|kharcha)\b/gi, ' ');
+      title = title.replace(new RegExp(`(?:^|[\\s,،])(?:${voiceNumberTokenPattern}|hundred|thousand|sau|hazaar|hazar|lakh|lac|crore|रुपये|रुपया|सौ|हजार|हज़ार|लाख|करोड़|करोड)(?=$|[\\s,،.!?])`, 'giu'), ' ');
+      currentGroup.members.filter(member => member !== 'You').forEach(member => {
+        const escaped = member.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        title = title.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), ' ');
       });
+      return title.replace(/[,.!?]+/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function parseVoiceMemberNames(text, replyOnly = false) {
+      const lower = text.toLowerCase();
+      if (/\b(?:all|everyone|sab|sabhi|sabko)\b/.test(lower)) {
+        return currentGroup.members.slice();
+      }
+      const matched = currentGroup.members.filter(member =>
+        member !== 'You' && lower.includes(member.toLowerCase())
+      );
+      if (matched.length) return ['You', ...matched];
+
+      let candidateText = text;
+      if (!replyOnly) {
+        const splitPhrase = text.match(/(?:with|among|ke\s+saath|ke\s+sath|mein\s+split)\s+(.+)/i);
+        if (!splitPhrase || currentGroup.members.filter(member => member !== 'You').length > 0) return [];
+        candidateText = splitPhrase[1];
+      }
+      const candidates = candidateText
+        .split(/\s*(?:,|،|&|\band\b|\baur\b)\s*/i)
+        .map(name => name.replace(/\b(?:group|split|divide|upi|cash|card|netbanking|ke\s+saath|ke\s+sath|friends?|dost|doston|please|mere|mera|hain|hai)\b/gi, '').trim())
+        .filter(name => /^[\p{L}][\p{L}' -]{0,30}$/u.test(name));
+      const names = candidates.filter(name => !/^(?:me|sab|sabhi|everyone)$/i.test(name));
+      if (!names.length) return [];
+      const additions = names.map(name => name.replace(/\b\p{L}/gu, letter => letter.toUpperCase()));
+      currentGroup.members = [...new Set(['You', ...currentGroup.members.filter(member => member !== 'You'), ...additions])];
+      if (pendingVoiceData) pendingVoiceData.membersAdded = true;
+      return ['You', ...additions];
     }
 
     function handleVoiceReply(text) {
-      const lower = text.toLowerCase().trim();
+      if (!pendingVoiceData) return;
+      const amount = extractAmount(text);
+      const parsedCategory = detectCategory(text);
+      const parsedTitle = cleanVoiceTitle(text, amount);
 
-      if (voiceConvStage === 'scope') {
-        if (lower.includes('split') || lower.includes('group') || lower.includes('baant') || lower.includes('dost')) {
-          btnVoiceScopeGroup.click();
-          voiceConvStage = 'members';
-        } else {
-          btnVoiceScopePersonal.click();
-          voiceConvStage = 'paymode';
+      if ((voiceConvStage === 'amount' || voiceConvStage === 'amount-title') && amount) {
+        pendingVoiceData.amount = amount;
+      }
+      if ((voiceConvStage === 'title' || voiceConvStage === 'amount-title') && parsedTitle) {
+        pendingVoiceData.title = parsedTitle;
+        pendingVoiceData.cat = parsedCategory;
+        populateCategorySelects();
+        voiceCategorySelect.value = parsedCategory.key || '';
+      }
+      if (voiceConvStage === 'members') {
+        const members = parseVoiceMemberNames(text, true);
+        if (!members.length) {
+          voiceAssistantHelp.textContent = 'दोस्तों के नाम समझ नहीं आए। दोबारा बोलिए।';
+          speakText('दोस्तों के नाम समझ नहीं आए। कृपया दोबारा बोलिए।', startReplyListening);
+          return;
         }
-        promptNextVoiceStage();
-      } else if (voiceConvStage === 'members') {
-        if (lower.includes('sab') || lower.includes('all') || lower.includes('everyone') || lower.includes('sabhi')) {
-          voiceMembersCheckboxContainer.querySelectorAll('input').forEach(b => b.checked = true);
-        } else {
-          let matchedAny = false;
-          voiceMembersCheckboxContainer.querySelectorAll('input').forEach(b => {
-            const m = b.value.toLowerCase();
-            if (m === 'you' || lower.includes(m)) {
-              b.checked = true;
-              matchedAny = true;
-            } else {
-              b.checked = false;
-            }
-          });
-          if (!matchedAny) {
-            voiceMembersCheckboxContainer.querySelectorAll('input').forEach(b => b.checked = true);
-          }
-        }
-        voiceConvStage = 'paymode';
-        promptNextVoiceStage();
-      } else if (voiceConvStage === 'paymode') {
-        const detectedMode = detectPaymentMode(lower);
-        if (voicePaymentModeSelect) voicePaymentModeSelect.value = detectedMode;
-        voiceConvStage = 'confirm';
-        promptNextVoiceStage();
-      } else if (voiceConvStage === 'confirm') {
-        if (lower.includes('haan') || lower.includes('yes') || lower.includes('kar do') || lower.includes('save') || lower.includes('thik')) {
-          btnConfirmVoiceSave.click();
-        } else if (lower.includes('nahin') || lower.includes('cancel') || lower.includes('no')) {
-          btnCancelVoiceModal.click();
-        } else {
-          voiceAssistantHelp.textContent = 'Button dabakar save kar sakte hain.';
+        pendingVoiceData.missingMembers = false;
+        renderVoiceMemberChoices(members);
+        if (pendingVoiceData.membersAdded) {
+          saveAndRenderGroup();
+          broadcastGroupState();
         }
       }
+
+      updateVoiceDraftSummary();
+      askForMissingVoiceData();
     }
 
-    function askVoiceClarification(amount, title, cat, pay, preCheckedMembers = null, defaultScope = null) {
-      pendingVoiceData = { amount, title, cat, pay };
+    function beginVoiceDraft(data) {
+      pendingVoiceData = data;
+      voiceSelectedScope = data.scope;
       populateCategorySelects();
+      voicePaymentModeSelect.value = data.pay || 'UPI';
+      voiceCategorySelect.value = data.cat && data.cat.key || '';
+      voiceInputDate.value = new Date().toISOString().split('T')[0];
+      voiceInputRemark.value = '';
+      btnVoiceScopePersonal.classList.toggle('active', data.scope === 'personal');
+      btnVoiceScopeGroup.classList.toggle('active', data.scope === 'group');
+      voiceGroupSplitSection.style.display = data.scope === 'group' ? 'block' : 'none';
+      renderVoiceMemberChoices(data.members || ['You']);
+      voiceAdvancedDetails.open = Boolean(data.missingMembers);
+      updateVoiceDraftSummary();
 
-      if (voicePaymentModeSelect) voicePaymentModeSelect.value = pay || 'UPI';
-      if (voiceCategorySelect && cat) voiceCategorySelect.value = cat.key || 'other';
-      if (voiceInputDate) voiceInputDate.value = new Date().toISOString().split('T')[0];
-      if (voiceInputRemark) voiceInputRemark.value = '';
-
-      voiceConfirmSubtext.textContent = `₹${amount} "${title}"`;
-
-      // Fill members checkboxes
-      voiceMembersCheckboxContainer.innerHTML = '';
-      const toCheck = preCheckedMembers && preCheckedMembers.length > 0 ? preCheckedMembers : ['You'];
-      currentGroup.members.forEach(m => {
-        const label = document.createElement('label');
-        label.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-main); font-weight:600; cursor:pointer;';
-        const isChecked = toCheck.includes(m);
-        label.innerHTML = `<input type="checkbox" value="${m}" ${isChecked ? 'checked' : ''} style="accent-color:var(--accent);"> ${m}`;
-        voiceMembersCheckboxContainer.appendChild(label);
-      });
-
-      const scope = defaultScope || (currentTab === 'group' ? 'group' : 'personal');
-      if (scope === 'group') {
-        btnVoiceScopeGroup.click();
-        voiceConvStage = preCheckedMembers && preCheckedMembers.length > 1 ? 'paymode' : 'members';
-      } else {
-        btnVoiceScopePersonal.click();
-        voiceConvStage = 'scope';
+      if (!data.amount || !data.title || data.missingMembers) {
+        voiceConfirmModal.style.display = 'flex';
+        askForMissingVoiceData();
+        return;
       }
-
-      voiceConfirmModal.style.display = 'flex';
-
-      // Ask question by Voice automatically!
-      setTimeout(() => {
-        promptNextVoiceStage();
-      }, 400);
+      savePendingVoiceExpense();
     }
 
     function processVoiceCommand(rawText) {
       const text = rawText.trim();
-      if (!text || text.includes('बोलिए...')) return;
+      if (!text) return;
 
       const amount = extractAmount(text);
-      if (!amount) {
-        showToast('कृपया रकम बोलें (जैसे: 500)');
-        return;
-      }
-
       const cat = detectCategory(text);
       const pay = detectPaymentMode(text);
 
-      let title = text.replace(new RegExp(`\\b${amount}\\b`, 'g'), '')
-                      .replace(/\b(?:rupaye|rupee|rupees|rs|inr|ka|mein|ko|ke\s+sath|with|upi|cash|card|netbanking|split|divide|among|barabar|sabhi|sab|doston|dosto|me|and|aur)\b/gi, ' ')
-                      .trim();
-      currentGroup.members.filter(m => m !== 'You').forEach(member => {
-        title = title.replace(new RegExp(`\\b${member.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi'), ' ');
-      });
-      title = title.replace(/\s+/g, ' ').trim();
-      if (!title) title = cat.label;
-      title = title.charAt(0).toUpperCase() + title.slice(1);
-
       const lower = text.toLowerCase();
-      let explicitSplit = false;
-      let splitAmong = [];
+      const mentionedMembers = currentGroup.members.filter(member =>
+        member !== 'You' && lower.includes(member.toLowerCase())
+      );
+      const wantsAllMembers = /\b(?:all|everyone|sab|sabhi|sabko|barabar)\b/.test(lower);
+      const explicitlyPersonal = /\b(?:personal|apna|mera|mere)\b/.test(lower);
+      const explicitlyGroup = /\b(?:group|split|divide|among|dost|doston|dosto|friends?)\b/.test(lower)
+        || /\b(?:with|ke\s+saath|ke\s+sath)\b/.test(lower)
+        || mentionedMembers.length > 0;
+      const scope = explicitlyPersonal
+        ? 'personal'
+        : (explicitlyGroup || currentTab === 'group') ? 'group' : 'personal';
 
-      if (lower.includes('sab') || lower.includes('all') || lower.includes('everyone') || lower.includes('barabar') || lower.includes('sabhi')) {
-        explicitSplit = true;
-        splitAmong = [...currentGroup.members];
-      } else {
-        currentGroup.members.forEach(m => {
-          if (m !== 'You' && lower.includes(m.toLowerCase())) {
-            explicitSplit = true;
-            splitAmong.push(m);
+      let members = ['You'];
+      let missingMembers = false;
+      if (scope === 'group') {
+        const availableMembers = currentGroup.members.includes('You')
+          ? currentGroup.members
+          : ['You', ...currentGroup.members];
+        if (wantsAllMembers) {
+          members = availableMembers;
+        } else if (mentionedMembers.length) {
+          members = ['You', ...mentionedMembers];
+        } else if (availableMembers.length > 1) {
+          members = availableMembers;
+        } else {
+          const names = parseVoiceMemberNames(text);
+          if (names.length > 1) members = names;
+          else {
+            members = availableMembers;
+            missingMembers = true;
           }
-        });
-        if (splitAmong.length > 0 && !splitAmong.includes('You')) {
-          splitAmong.unshift('You');
         }
       }
 
-      // If user mentions split or we are in group tab or explicit friend name detected:
-      // ALWAYS show confirmation popup so user can confirm date, remark, and EXACT members!
-      const defaultScope = (currentTab === 'group' || explicitSplit) ? 'group' : 'personal';
-      const preMembers = splitAmong.length > 0 ? splitAmong : (currentTab === 'group' ? currentGroup.members : ['You']);
+      let title = cleanVoiceTitle(text, amount);
+      if (!title && cat.key !== 'other') title = cat.label;
+      title = title ? title.charAt(0).toUpperCase() + title.slice(1) : '';
 
-      askVoiceClarification(amount, title, cat, pay, preMembers, defaultScope);
+      beginVoiceDraft({
+        amount: Number.isFinite(amount) && amount > 0 ? amount : null,
+        title,
+        cat,
+        pay,
+        scope,
+        members,
+        missingMembers
+      });
     }
 
     voiceMicBtn.addEventListener('click', toggleListening);
