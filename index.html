@@ -196,14 +196,12 @@
       transition: transform 0.1s;
     }
 
-    .expense-item:active {
-      transform: scale(0.99);
-    }
-
     .item-left {
       display: flex;
       align-items: center;
       gap: 12px;
+      flex: 1;
+      overflow: hidden;
     }
 
     .category-icon {
@@ -215,12 +213,16 @@
       align-items: center;
       justify-content: center;
       font-size: 20px;
+      flex-shrink: 0;
     }
 
     .item-title {
       font-size: 14px;
       font-weight: 700;
       color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .item-meta {
@@ -246,6 +248,42 @@
       color: var(--accent-dark);
       margin-top: 3px;
       display: inline-block;
+    }
+
+    .payment-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #F1F5F9;
+      color: var(--text-muted);
+      display: inline-block;
+      margin-left: 4px;
+    }
+
+    .item-action-btns {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+    }
+
+    .icon-btn-small {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: #F8FAFC;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .icon-btn-small:hover {
+      background: #E2E8F0;
+      color: var(--text-main);
     }
 
     /* Settlement Debts Cards */
@@ -301,6 +339,28 @@
       background: var(--accent);
       color: #fff;
       border-color: var(--accent);
+    }
+
+    /* Member Tag Chips */
+    .member-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #F1F5F9;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 3px;
+    }
+
+    .member-chip-remove {
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 800;
     }
 
     /* Split Configuration Grid in Modal */
@@ -559,7 +619,7 @@
       <span style="font-size:11px; color:var(--accent); font-weight:800;">🎙️ LISTENING (बोलिए...)</span>
       <span id="voiceStatus" style="font-size:11px; color:var(--text-muted);">Listening</span>
     </div>
-    <div id="voiceTranscript" class="voice-transcript">"पेट्रोल 500" या "डिनर 1200 राहुल और अमन"</div>
+    <div id="voiceTranscript" class="voice-transcript">"डिनर 1200 राहुल और अमन" या "पेट्रोल 500 UPI"</div>
     <div id="voiceTags" class="voice-detected-tags"></div>
   </div>
 
@@ -602,14 +662,24 @@
               • <span id="membersCountText">3 Members</span>
             </div>
           </div>
-          <button id="btnSwitchGroup" class="action-btn-circle" style="width: 38px; height: 38px;" title="Groups & Rooms">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-          </button>
+          <div style="display:flex; gap:6px;">
+            <button id="btnManageMembers" class="action-btn-circle" style="width: 38px; height: 38px;" title="Add / Remove Friends">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <line x1="19" y1="8" x2="19" y2="14"></line>
+                <line x1="22" y1="11" x2="16" y2="11"></line>
+              </svg>
+            </button>
+            <button id="btnSwitchGroup" class="action-btn-circle" style="width: 38px; height: 38px;" title="Switch / New Group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Group Summary Card -->
@@ -676,13 +746,13 @@
   </div>
 
   <!-- ==============================================================
-       ADVANCED ADD EXPENSE MODAL (With All 4 Split Modes & Multi-Payers)
+       ADVANCED ADD / EDIT EXPENSE MODAL
   ============================================================== -->
   <div id="addModal" class="modal-backdrop" style="display: none;">
     <div class="modal-card">
-      <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 14px; color:var(--text-main);">Add New Expense</h3>
+      <h3 id="modalHeadingText" style="font-size: 18px; font-weight: 800; margin-bottom: 14px; color:var(--text-main);">Add New Expense</h3>
 
-      <div class="form-group">
+      <div class="form-group" id="expenseTypeGroup">
         <label class="form-label">Expense Type</label>
         <div style="display:flex; gap:8px;">
           <button type="button" id="modalTypePersonal" class="tab-btn active" style="flex:1; border-radius:10px; padding:8px;">Personal</button>
@@ -700,6 +770,17 @@
         <input type="text" id="inputTitle" class="form-control" placeholder="e.g. Hotel stay or Dinner" required>
       </div>
 
+      <!-- Payment Mode Selector -->
+      <div class="form-group">
+        <label class="form-label">Payment Mode (पेमेंट का माध्यम)</label>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button type="button" class="btn-pill active payment-mode-pill" data-pay="UPI">📱 UPI</button>
+          <button type="button" class="btn-pill payment-mode-pill" data-pay="Cash">💵 Cash</button>
+          <button type="button" class="btn-pill payment-mode-pill" data-pay="Card">💳 Card</button>
+          <button type="button" class="btn-pill payment-mode-pill" data-pay="NetBanking">🏦 NetBanking</button>
+        </div>
+      </div>
+
       <!-- GROUP SPLIT ADVANCED SECTION -->
       <div id="groupSplitFields" style="display: none;">
         <!-- Payer Selection Mode -->
@@ -708,9 +789,7 @@
             <label class="form-label" style="margin-bottom:0;">Paid By</label>
             <button type="button" id="btnToggleMultiPay" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:700; cursor:pointer;">Multiple Payers?</button>
           </div>
-          <!-- Single Payer Dropdown -->
           <select id="selectSinglePayer" class="form-control"></select>
-          <!-- Multiple Payers Inputs -->
           <div id="multiPayContainer" style="display:none; margin-top:8px;"></div>
         </div>
 
@@ -718,10 +797,10 @@
         <div class="form-group">
           <label class="form-label">Split Method</label>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button type="button" class="btn-pill active" data-mode="equal">= Equal</button>
-            <button type="button" class="btn-pill" data-mode="exact">₹ Exact</button>
-            <button type="button" class="btn-pill" data-mode="percent">% Percent</button>
-            <button type="button" class="btn-pill" data-mode="shares">1x Shares</button>
+            <button type="button" class="btn-pill active split-mode-pill" data-mode="equal">= Equal</button>
+            <button type="button" class="btn-pill split-mode-pill" data-mode="exact">₹ Exact</button>
+            <button type="button" class="btn-pill split-mode-pill" data-mode="percent">% Percent</button>
+            <button type="button" class="btn-pill split-mode-pill" data-mode="shares">1x Shares</button>
           </div>
         </div>
 
@@ -734,6 +813,64 @@
 
       <button type="button" id="btnSaveExpense" class="btn-primary" style="margin-top:6px;">Save &amp; Record</button>
       <button type="button" id="btnCloseModal" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Manage Members Modal (Add / Remove Friends) -->
+  <div id="membersModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 6px;">Manage Friends &amp; Members</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Add new friends or remove members from this group.</p>
+
+      <div class="form-group">
+        <label class="form-label">Current Group Members</label>
+        <div id="currentMembersChipsList" style="margin-bottom: 12px;"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Add New Friend Name</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="inputNewFriendName" class="form-control" placeholder="e.g. Vikas, Priya">
+          <button type="button" id="btnAddFriendBtn" class="btn-primary" style="width: 90px; padding: 10px;">+ Add</button>
+        </div>
+      </div>
+
+      <button type="button" id="btnCloseMembersModal" class="btn-secondary" style="margin-top: 14px;">Done</button>
+    </div>
+  </div>
+
+  <!-- Voice Clarification & Confirmation Modal -->
+  <div id="voiceConfirmModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div style="font-size:24px; text-align:center; margin-bottom:4px;">🤔</div>
+      <h3 style="font-size: 17px; font-weight: 800; text-align:center; margin-bottom: 6px;">Confirm Voice Expense</h3>
+      <p id="voiceConfirmSubtext" style="font-size: 12px; color: var(--text-muted); text-align:center; margin-bottom: 16px;">किसमें और कैसे स्प्लिट करना है?</p>
+
+      <div class="form-group">
+        <label class="form-label">Expense Scope (कहाँ जोड़ना है?)</label>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="btnVoiceScopePersonal" class="tab-btn" style="flex:1; border-radius:10px; padding:10px;">👤 Personal Expense</button>
+          <button type="button" id="btnVoiceScopeGroup" class="tab-btn active" style="flex:1; border-radius:10px; padding:10px;">👥 Split in Group</button>
+        </div>
+      </div>
+
+      <div class="form-group" id="voiceGroupSplitSection">
+        <label class="form-label">Split Among Members</label>
+        <div id="voiceMembersCheckboxContainer" style="display:flex; flex-direction:column; gap:6px; background:#F8FAFC; padding:10px; border-radius:8px; border:1px solid var(--card-border);"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Payment Mode</label>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button type="button" class="btn-pill voice-pay-pill active" data-pay="UPI">📱 UPI</button>
+          <button type="button" class="btn-pill voice-pay-pill" data-pay="Cash">💵 Cash</button>
+          <button type="button" class="btn-pill voice-pay-pill" data-pay="Card">💳 Card</button>
+          <button type="button" class="btn-pill voice-pay-pill" data-pay="NetBanking">🏦 NetBanking</button>
+        </div>
+      </div>
+
+      <button type="button" id="btnConfirmVoiceSave" class="btn-primary" style="margin-top:8px;">Confirm &amp; Save Expense</button>
+      <button type="button" id="btnCancelVoiceModal" class="btn-secondary">Cancel</button>
     </div>
   </div>
 
@@ -775,6 +912,8 @@
     ============================================================== */
     let personalExpenses = JSON.parse(localStorage.getItem('kharacha_personal') || '[]');
     let currentTab = 'personal';
+    let editingExpenseId = null;
+    let selectedPaymentMode = 'UPI';
 
     // Default sample group with live calculations
     let currentGroup = JSON.parse(localStorage.getItem('kharacha_active_group') || JSON.stringify({
@@ -782,8 +921,8 @@
       name: '🏖️ Goa Trip 2026',
       members: ['You', 'Rahul', 'Aman'],
       expenses: [
-        { id: '1', title: 'Hotel Booking', amount: 3000, paidBy: 'You', splitMode: 'equal', splitData: { 'You': 1000, 'Rahul': 1000, 'Aman': 1000 }, date: new Date().toISOString() },
-        { id: '2', title: 'Dinner at Beach', amount: 1500, paidBy: 'Rahul', splitMode: 'equal', splitData: { 'You': 500, 'Rahul': 500, 'Aman': 500 }, date: new Date().toISOString() }
+        { id: '1', title: 'Hotel Booking', amount: 3000, paidBy: 'You', paymentMode: 'UPI', splitMode: 'equal', splitData: { 'You': 1000, 'Rahul': 1000, 'Aman': 1000 }, date: new Date().toISOString() },
+        { id: '2', title: 'Dinner at Beach', amount: 1500, paidBy: 'Rahul', paymentMode: 'Cash', splitMode: 'equal', splitData: { 'You': 500, 'Rahul': 500, 'Aman': 500 }, date: new Date().toISOString() }
       ]
     }));
 
@@ -808,6 +947,14 @@
       return { key: 'other', emoji: '💸', label: 'General Expense' };
     }
 
+    function detectPaymentMode(text) {
+      const lower = text.toLowerCase();
+      if (lower.includes('cash') || lower.includes('nakad') || lower.includes('nqd')) return 'Cash';
+      if (lower.includes('card') || lower.includes('credit') || lower.includes('debit')) return 'Card';
+      if (lower.includes('netbanking') || lower.includes('bank')) return 'NetBanking';
+      return 'UPI';
+    }
+
     function extractAmount(text) {
       const match = text.match(/\b\d+(\.\d{1,2})?\b/);
       return match ? parseFloat(match[0]) : null;
@@ -828,7 +975,10 @@
       groupEventSource.onmessage = (event) => {
         try {
           const payload = JSON.parse(event.data);
-          if (payload && payload.event === 'NEW_EXPENSE' && payload.expense) {
+          if (payload && payload.event === 'SYNC_GROUP' && payload.group) {
+            currentGroup = payload.group;
+            saveAndRenderGroup();
+          } else if (payload && payload.event === 'NEW_EXPENSE' && payload.expense) {
             const exists = currentGroup.expenses.some(e => e.id === payload.expense.id);
             if (!exists) {
               currentGroup.expenses.unshift(payload.expense);
@@ -840,12 +990,12 @@
       };
     }
 
-    async function broadcastGroupExpense(expense) {
+    async function broadcastGroupState() {
       const channel = `kharacha_room_${currentGroup.id.toLowerCase()}`;
       try {
         await fetch(`https://ntfy.sh/${channel}`, {
           method: 'POST',
-          body: JSON.stringify({ event: 'NEW_EXPENSE', expense })
+          body: JSON.stringify({ event: 'SYNC_GROUP', group: currentGroup })
         });
       } catch (e) {
         console.warn('Sync broadcast error:', e);
@@ -864,12 +1014,10 @@
 
         // 1. Credit the payer(s)
         if (typeof exp.paidBy === 'object' && exp.paidBy !== null) {
-          // Multiple payers
           for (const [payer, amt] of Object.entries(exp.paidBy)) {
             balances[payer] = (balances[payer] || 0) + amt;
           }
         } else {
-          // Single payer
           balances[exp.paidBy] = (balances[exp.paidBy] || 0) + total;
         }
 
@@ -879,7 +1027,6 @@
             balances[member] = (balances[member] || 0) - share;
           }
         } else {
-          // Fallback equal split
           const splitList = exp.splitAmong || currentGroup.members;
           const share = total / splitList.length;
           splitList.forEach(m => {
@@ -888,7 +1035,6 @@
         }
       });
 
-      // Divide into debtors and creditors
       const debtors = [];
       const creditors = [];
 
@@ -926,7 +1072,7 @@
     }
 
     /* ==============================================================
-       4. SPEECH RECOGNITION (VOICE ENGINE FOR PERSONAL & SPLIT)
+       4. SPEECH RECOGNITION (SMART MULTI-USER & PAYMENT PARSER)
     ============================================================== */
     const voiceMicBtn = document.getElementById('voiceMicBtn');
     const voiceBanner = document.getElementById('voiceBanner');
@@ -950,7 +1096,7 @@
         voiceMicBtn.classList.add('listening');
         voiceBanner.classList.add('active');
         voiceStatus.textContent = 'Listening...';
-        voiceTranscript.textContent = currentTab === 'group' ? 'बोलिए... (जैसे: डिनर 1200 राहुल और अमन)' : 'बोलिए... (जैसे: पेट्रोल 500)';
+        voiceTranscript.textContent = currentTab === 'group' ? 'बोलिए... (जैसे: डिनर 1200 राहुल और अमन UPI)' : 'बोलिए... (जैसे: पेट्रोल 500 Cash)';
         voiceTags.innerHTML = '';
       };
 
@@ -963,10 +1109,12 @@
         voiceTranscript.textContent = `"${transcript}"`;
         const amount = extractAmount(transcript);
         const cat = detectCategory(transcript);
+        const pay = detectPaymentMode(transcript);
 
         voiceTags.innerHTML = '';
         if (amount) voiceTags.innerHTML += `<span class="v-tag">₹${amount}</span>`;
         if (cat) voiceTags.innerHTML += `<span class="v-tag">${cat.emoji} ${cat.label}</span>`;
+        if (pay) voiceTags.innerHTML += `<span class="v-tag">💳 ${pay}</span>`;
       };
 
       recognition.onerror = (err) => {
@@ -998,45 +1146,179 @@
       setTimeout(() => { voiceBanner.classList.remove('active'); }, 1500);
     }
 
+    let pendingVoiceData = null;
+    const voiceConfirmModal = document.getElementById('voiceConfirmModal');
+    const voiceConfirmSubtext = document.getElementById('voiceConfirmSubtext');
+    const btnVoiceScopePersonal = document.getElementById('btnVoiceScopePersonal');
+    const btnVoiceScopeGroup = document.getElementById('btnVoiceScopeGroup');
+    const voiceGroupSplitSection = document.getElementById('voiceGroupSplitSection');
+    const voiceMembersCheckboxContainer = document.getElementById('voiceMembersCheckboxContainer');
+    const btnConfirmVoiceSave = document.getElementById('btnConfirmVoiceSave');
+    const btnCancelVoiceModal = document.getElementById('btnCancelVoiceModal');
+
+    let voiceSelectedScope = 'group';
+    let voiceSelectedPayMode = 'UPI';
+
+    btnVoiceScopePersonal.addEventListener('click', () => {
+      voiceSelectedScope = 'personal';
+      btnVoiceScopePersonal.classList.add('active');
+      btnVoiceScopeGroup.classList.remove('active');
+      voiceGroupSplitSection.style.display = 'none';
+    });
+
+    btnVoiceScopeGroup.addEventListener('click', () => {
+      voiceSelectedScope = 'group';
+      btnVoiceScopeGroup.classList.add('active');
+      btnVoiceScopePersonal.classList.remove('active');
+      voiceGroupSplitSection.style.display = 'block';
+    });
+
+    document.querySelectorAll('.voice-pay-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.voice-pay-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        voiceSelectedPayMode = btn.dataset.pay;
+      });
+    });
+
+    btnCancelVoiceModal.addEventListener('click', () => {
+      voiceConfirmModal.style.display = 'none';
+      pendingVoiceData = null;
+    });
+
+    btnConfirmVoiceSave.addEventListener('click', () => {
+      if (!pendingVoiceData) return;
+
+      if (voiceSelectedScope === 'personal') {
+        const newExp = {
+          id: Date.now().toString(),
+          title: pendingVoiceData.title,
+          amount: pendingVoiceData.amount,
+          paymentMode: voiceSelectedPayMode,
+          category: pendingVoiceData.cat.key,
+          emoji: pendingVoiceData.cat.emoji,
+          date: new Date().toISOString()
+        };
+        personalExpenses.unshift(newExp);
+        saveAndRenderPersonal();
+        showToast(`✅ Personal: ₹${newExp.amount} (${newExp.title} • ${voiceSelectedPayMode}) Saved!`);
+      } else {
+        const checkedMembers = Array.from(voiceMembersCheckboxContainer.querySelectorAll('input:checked')).map(i => i.value);
+        if (checkedMembers.length === 0) {
+          showToast('Select at least one member to split!');
+          return;
+        }
+
+        const splitData = {};
+        const shareAmt = Math.round((pendingVoiceData.amount / checkedMembers.length) * 100) / 100;
+        checkedMembers.forEach(m => splitData[m] = shareAmt);
+
+        const newExp = {
+          id: Date.now().toString(),
+          title: pendingVoiceData.title,
+          amount: pendingVoiceData.amount,
+          paidBy: 'You',
+          paymentMode: voiceSelectedPayMode,
+          splitMode: 'equal',
+          splitData: splitData,
+          date: new Date().toISOString()
+        };
+        currentGroup.expenses.unshift(newExp);
+        saveAndRenderGroup();
+        broadcastGroupState();
+        showToast(`✅ Split ₹${newExp.amount} (${voiceSelectedPayMode}) among ${checkedMembers.join(', ')}!`);
+      }
+
+      voiceConfirmModal.style.display = 'none';
+      pendingVoiceData = null;
+    });
+
+    function askVoiceClarification(amount, title, cat, pay) {
+      pendingVoiceData = { amount, title, cat, pay };
+      voiceSelectedPayMode = pay;
+      document.querySelectorAll('.voice-pay-pill').forEach(b => {
+        b.classList.toggle('active', b.dataset.pay === pay);
+      });
+
+      voiceConfirmSubtext.textContent = `₹${amount} "${title}" को कहाँ जोड़ना है?`;
+
+      // Pre-fill members checkboxes
+      voiceMembersCheckboxContainer.innerHTML = '';
+      currentGroup.members.forEach(m => {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-main); font-weight:600; cursor:pointer;';
+        label.innerHTML = `<input type="checkbox" value="${m}" checked style="accent-color:var(--accent);"> ${m}`;
+        voiceMembersCheckboxContainer.appendChild(label);
+      });
+
+      if (currentTab === 'group') {
+        btnVoiceScopeGroup.click();
+      } else {
+        btnVoiceScopePersonal.click();
+      }
+
+      voiceConfirmModal.style.display = 'flex';
+    }
+
     function processVoiceCommand(rawText) {
       const text = rawText.trim();
       if (!text || text.includes('बोलिए...')) return;
 
       const amount = extractAmount(text);
       if (!amount) {
-        showToast('कृपया कीमत भी बोलें (जैसे: 500)');
+        showToast('कृपया रकम बोलें (जैसे: 500)');
         return;
       }
 
       const cat = detectCategory(text);
+      const pay = detectPaymentMode(text);
 
-      // Check if it mentions members for split (e.g., "Rahul", "Aman")
+      let title = text.replace(new RegExp(`\\b${amount}\\b`, 'g'), '')
+                      .replace(/rupaye|rupee|rs|ka|mein|ko|ke sath|with|upi|cash|card|barabar|sab/gi, '').trim();
+      if (!title) title = cat.label;
+      title = title.charAt(0).toUpperCase() + title.slice(1);
+
+      // Check if text mentions members or says "all / sabhi / sab / split"
       const lower = text.toLowerCase();
-      const mentionedMembers = [];
-      currentGroup.members.forEach(m => {
-        if (lower.includes(m.toLowerCase())) {
-          mentionedMembers.push(m);
-        }
-      });
+      let explicitSplit = false;
+      let splitAmong = [];
 
-      if (currentTab === 'group' || mentionedMembers.length > 0) {
+      if (lower.includes('sab') || lower.includes('all') || lower.includes('everyone') || lower.includes('barabar') || lower.includes('split') || lower.includes('baant')) {
+        explicitSplit = true;
+        splitAmong = [...currentGroup.members];
+      } else {
+        currentGroup.members.forEach(m => {
+          if (lower.includes(m.toLowerCase())) {
+            explicitSplit = true;
+            splitAmong.push(m);
+          }
+        });
+      }
+
+      // If user did not specify split options clearly (No member mentioned and not in group tab)
+      if (!explicitSplit && currentTab !== 'group') {
+        // Smart Clarification Popup!
+        askVoiceClarification(amount, title, cat, pay);
+        return;
+      }
+
+      if (currentTab === 'group' || explicitSplit) {
         // GROUP SPLIT ENTRY
-        if (!mentionedMembers.includes('You')) mentionedMembers.push('You');
-        const splitAmong = mentionedMembers.length > 1 ? mentionedMembers : currentGroup.members;
+        if (!splitAmong.includes('You')) splitAmong.push('You');
+        if (splitAmong.length === 1 && currentGroup.members.length > 1) {
+          splitAmong = [...currentGroup.members];
+        }
 
-        let title = text.replace(new RegExp(`\\b${amount}\\b`, 'g'), '').replace(/rupaye|rupee|rs|ka|mein|ko|ke sath|with/gi, '').trim();
-        if (!title) title = cat.label;
-
-        // Equal split calculation
         const splitData = {};
         const shareAmt = Math.round((amount / splitAmong.length) * 100) / 100;
         splitAmong.forEach(m => splitData[m] = shareAmt);
 
         const newExp = {
           id: Date.now().toString(),
-          title: title.charAt(0).toUpperCase() + title.slice(1),
+          title: title,
           amount: amount,
           paidBy: 'You',
+          paymentMode: pay,
           splitMode: 'equal',
           splitData: splitData,
           date: new Date().toISOString()
@@ -1044,17 +1326,15 @@
 
         currentGroup.expenses.unshift(newExp);
         saveAndRenderGroup();
-        broadcastGroupExpense(newExp);
-        showToast(`✅ Split ₹${amount} among ${splitAmong.join(', ')}!`);
+        broadcastGroupState();
+        showToast(`✅ Split ₹${amount} (${pay}) among ${splitAmong.join(', ')}!`);
       } else {
         // PERSONAL EXPENSE ENTRY
-        let title = text.replace(new RegExp(`\\b${amount}\\b`, 'g'), '').replace(/rupaye|rupee|rs|ka|mein|ko/gi, '').trim();
-        if (!title) title = cat.label;
-
         const newExp = {
           id: Date.now().toString(),
-          title: title.charAt(0).toUpperCase() + title.slice(1),
+          title: title,
           amount: amount,
+          paymentMode: pay,
           category: cat.key,
           emoji: cat.emoji,
           date: new Date().toISOString()
@@ -1062,14 +1342,14 @@
 
         personalExpenses.unshift(newExp);
         saveAndRenderPersonal();
-        showToast(`✅ ₹${amount} (${cat.emoji} ${newExp.title}) Saved!`);
+        showToast(`✅ ₹${amount} (${cat.emoji} ${newExp.title} • ${pay}) Saved!`);
       }
     }
 
     voiceMicBtn.addEventListener('click', toggleListening);
 
     /* ==============================================================
-       5. RENDER LOGIC (LIGHT THEME PERSONAL & GROUP)
+       5. RENDER LOGIC WITH EDIT & DELETE BUTTONS
     ============================================================== */
     function saveAndRenderPersonal() {
       localStorage.setItem('kharacha_personal', JSON.stringify(personalExpenses));
@@ -1103,12 +1383,21 @@
               <div class="category-icon">${item.emoji || '💸'}</div>
               <div>
                 <div class="item-title">${item.title}</div>
-                <div class="item-meta">${timeFormatted} • ${CATEGORIES[item.category]?.label || 'General'}</div>
+                <div class="item-meta">
+                  ${timeFormatted} • ${CATEGORIES[item.category]?.label || 'General'}
+                  <span class="payment-badge">${item.paymentMode || 'UPI'}</span>
+                </div>
               </div>
             </div>
-            <div>
-              <div class="item-amount">₹${item.amount.toLocaleString('en-IN')}</div>
-              <span class="item-tag">Personal</span>
+            <div style="display:flex; align-items:center;">
+              <div>
+                <div class="item-amount">₹${item.amount.toLocaleString('en-IN')}</div>
+                <div style="text-align:right;"><span class="item-tag">Personal</span></div>
+              </div>
+              <div class="item-action-btns">
+                <button class="icon-btn-small" onclick="openEditModal('personal', '${item.id}')" title="Edit">✏️</button>
+                <button class="icon-btn-small" onclick="deleteExpense('personal', '${item.id}')" title="Delete" style="color:var(--danger);">🗑️</button>
+              </div>
             </div>
           `;
           listContainer.appendChild(div);
@@ -1134,14 +1423,12 @@
 
       currentGroup.expenses.forEach(exp => {
         groupTotal += exp.amount;
-        // Payer
         if (typeof exp.paidBy === 'object' && exp.paidBy !== null) {
           if (exp.paidBy['You']) youPaid += exp.paidBy['You'];
         } else if (exp.paidBy === 'You') {
           youPaid += exp.amount;
         }
 
-        // Share
         if (exp.splitData && exp.splitData['You']) {
           yourShare += exp.splitData['You'];
         } else if (exp.splitAmong && exp.splitAmong.includes('You')) {
@@ -1153,7 +1440,7 @@
       document.getElementById('youPaidAmount').textContent = youPaid.toLocaleString('en-IN');
       document.getElementById('yourShareAmount').textContent = Math.round(yourShare).toLocaleString('en-IN');
 
-      // Render Settlement summary (Who owes whom)
+      // Settlements Calculation
       const { transactions } = calculateSettlements();
       const settleContainer = document.getElementById('settlementsListContainer');
       settleContainer.innerHTML = '';
@@ -1177,7 +1464,7 @@
         });
       }
 
-      // Render Group Expenses List
+      // Group Expense List
       const listContainer = document.getElementById('groupExpenseList');
       listContainer.innerHTML = '';
 
@@ -1196,12 +1483,21 @@
               <div class="category-icon">👥</div>
               <div>
                 <div class="item-title">${exp.title}</div>
-                <div class="item-meta">${payerStr} • <span style="color:var(--accent); font-weight:700;">${modeBadge}</span></div>
+                <div class="item-meta">
+                  ${payerStr} • <span style="color:var(--accent); font-weight:700;">${modeBadge}</span>
+                  <span class="payment-badge">${exp.paymentMode || 'UPI'}</span>
+                </div>
               </div>
             </div>
-            <div>
-              <div class="item-amount">₹${exp.amount.toLocaleString('en-IN')}</div>
-              <span class="item-tag" style="background:var(--warning-light); color:var(--warning);">Group</span>
+            <div style="display:flex; align-items:center;">
+              <div>
+                <div class="item-amount">₹${exp.amount.toLocaleString('en-IN')}</div>
+                <div style="text-align:right;"><span class="item-tag" style="background:var(--warning-light); color:var(--warning);">Group</span></div>
+              </div>
+              <div class="item-action-btns">
+                <button class="icon-btn-small" onclick="openEditModal('group', '${exp.id}')" title="Edit">✏️</button>
+                <button class="icon-btn-small" onclick="deleteExpense('group', '${exp.id}')" title="Delete" style="color:var(--danger);">🗑️</button>
+              </div>
             </div>
           `;
           listContainer.appendChild(div);
@@ -1214,15 +1510,141 @@
     }
 
     /* ==============================================================
-       6. ADVANCED SPLIT MODAL LOGIC (4 Modes: Equal, Exact, Percent, Shares)
-    ============================================================= */
+       6. EDIT & DELETE HANDLERS
+    ============================================================== */
+    window.deleteExpense = function(type, id) {
+      if (!confirm('क्या आप इस खर्चे को हटाना चाहते हैं? (Delete this expense?)')) return;
+
+      if (type === 'personal') {
+        personalExpenses = personalExpenses.filter(e => e.id !== id);
+        saveAndRenderPersonal();
+        showToast('Personal expense deleted!');
+      } else {
+        currentGroup.expenses = currentGroup.expenses.filter(e => e.id !== id);
+        saveAndRenderGroup();
+        broadcastGroupState();
+        showToast('Group expense deleted!');
+      }
+    };
+
+    window.openEditModal = function(type, id) {
+      editingExpenseId = id;
+      modalMode = type;
+      document.getElementById('modalHeadingText').textContent = 'Edit Expense';
+      document.getElementById('expenseTypeGroup').style.display = 'none'; // Lock type while editing
+
+      let exp = null;
+      if (type === 'personal') {
+        exp = personalExpenses.find(e => e.id === id);
+        modalTypePersonal.click();
+      } else {
+        exp = currentGroup.expenses.find(e => e.id === id);
+        modalTypeGroup.click();
+      }
+
+      if (exp) {
+        inputAmount.value = exp.amount;
+        document.getElementById('inputTitle').value = exp.title;
+
+        // Payment Mode
+        selectedPaymentMode = exp.paymentMode || 'UPI';
+        document.querySelectorAll('.payment-mode-pill').forEach(p => {
+          p.classList.toggle('active', p.dataset.pay === selectedPaymentMode);
+        });
+
+        // Split Mode
+        if (type === 'group') {
+          currentSplitMode = exp.splitMode || 'equal';
+          document.querySelectorAll('.split-mode-pill').forEach(b => {
+            b.classList.toggle('active', b.dataset.mode === currentSplitMode);
+          });
+          selectSinglePayer.value = typeof exp.paidBy === 'string' ? exp.paidBy : 'You';
+          renderSplitBreakdownRows();
+        }
+
+        addModal.style.display = 'flex';
+      }
+    };
+
+    /* ==============================================================
+       7. MANAGE FRIENDS (ADD & REMOVE MEMBERS)
+    ============================================================== */
+    const membersModal = document.getElementById('membersModal');
+    const btnManageMembers = document.getElementById('btnManageMembers');
+    const btnCloseMembersModal = document.getElementById('btnCloseMembersModal');
+    const currentMembersChipsList = document.getElementById('currentMembersChipsList');
+    const inputNewFriendName = document.getElementById('inputNewFriendName');
+    const btnAddFriendBtn = document.getElementById('btnAddFriendBtn');
+
+    btnManageMembers.addEventListener('click', () => {
+      renderMembersChips();
+      membersModal.style.display = 'flex';
+    });
+
+    btnCloseMembersModal.addEventListener('click', () => {
+      membersModal.style.display = 'none';
+    });
+
+    function renderMembersChips() {
+      currentMembersChipsList.innerHTML = '';
+      currentGroup.members.forEach(m => {
+        const chip = document.createElement('span');
+        chip.className = 'member-chip';
+        chip.innerHTML = `
+          <span>👤 ${m}</span>
+          ${m !== 'You' ? `<span class="member-chip-remove" onclick="removeFriend('${m}')" title="Remove">&times;</span>` : ''}
+        `;
+        currentMembersChipsList.appendChild(chip);
+      });
+    }
+
+    window.removeFriend = function(name) {
+      if (!confirm(`क्या आप ${name} को ग्रुप से हटाना चाहते हैं?`)) return;
+      currentGroup.members = currentGroup.members.filter(m => m !== name);
+      renderMembersChips();
+      saveAndRenderGroup();
+      broadcastGroupState();
+      showToast(`${name} removed from group.`);
+    };
+
+    btnAddFriendBtn.addEventListener('click', () => {
+      const friendName = inputNewFriendName.value.trim();
+      if (!friendName) {
+        showToast('Please enter friend name!');
+        return;
+      }
+      if (currentGroup.members.map(m => m.toLowerCase()).includes(friendName.toLowerCase())) {
+        showToast('Friend already in group!');
+        return;
+      }
+
+      currentGroup.members.push(friendName);
+      inputNewFriendName.value = '';
+      renderMembersChips();
+      saveAndRenderGroup();
+      broadcastGroupState();
+      showToast(`✅ ${friendName} added to group!`);
+    });
+
+    /* ==============================================================
+       8. PAYMENT & SPLIT MODES BINDINGS
+    ============================================================== */
     let currentSplitMode = 'equal';
     let isMultiPayMode = false;
 
+    // Payment mode click
+    document.querySelectorAll('.payment-mode-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.payment-mode-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedPaymentMode = btn.dataset.pay;
+      });
+    });
+
     // Split mode pills click
-    document.querySelectorAll('[data-mode]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.split-mode-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.split-mode-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentSplitMode = btn.dataset.mode;
         recalculateSplitBreakdown();
@@ -1264,7 +1686,6 @@
       });
     }
 
-    // Dynamic Member Split Breakdown Rows
     const splitBreakdownRowsContainer = document.getElementById('splitBreakdownRowsContainer');
     const inputAmount = document.getElementById('inputAmount');
 
@@ -1336,7 +1757,7 @@
     }
 
     /* ==============================================================
-       7. SAVE EXPENSE HANDLER (PERSONAL & SPLIT MODES)
+       9. SAVE EXPENSE (INSERT & UPDATE WITH PAYMENT MODE)
     ============================================================== */
     document.getElementById('btnSaveExpense').addEventListener('click', () => {
       const amount = parseFloat(inputAmount.value);
@@ -1349,16 +1770,25 @@
 
       if (modalMode === 'personal') {
         const cat = detectCategory(title);
-        personalExpenses.unshift({
-          id: Date.now().toString(),
+        const expData = {
+          id: editingExpenseId || Date.now().toString(),
           title: title,
           amount: amount,
+          paymentMode: selectedPaymentMode,
           category: cat.key,
           emoji: cat.emoji,
           date: new Date().toISOString()
-        });
+        };
+
+        if (editingExpenseId) {
+          const idx = personalExpenses.findIndex(e => e.id === editingExpenseId);
+          if (idx !== -1) personalExpenses[idx] = expData;
+          showToast('Personal expense updated!');
+        } else {
+          personalExpenses.unshift(expData);
+          showToast('Personal expense saved!');
+        }
         saveAndRenderPersonal();
-        showToast('Personal expense saved!');
       } else {
         // GROUP EXPENSE SAVE
         let paidByData = selectSinglePayer.value;
@@ -1378,7 +1808,6 @@
           }
         }
 
-        // Calculate Split Shares
         const splitData = {};
         const activeBoxes = Array.from(document.querySelectorAll('.split-member-chk:checked'));
 
@@ -1413,29 +1842,37 @@
           });
         }
 
-        const newExp = {
-          id: Date.now().toString(),
+        const expData = {
+          id: editingExpenseId || Date.now().toString(),
           title: title,
           amount: amount,
           paidBy: paidByData,
+          paymentMode: selectedPaymentMode,
           splitMode: currentSplitMode,
           splitData: splitData,
           date: new Date().toISOString()
         };
 
-        currentGroup.expenses.unshift(newExp);
+        if (editingExpenseId) {
+          const idx = currentGroup.expenses.findIndex(e => e.id === editingExpenseId);
+          if (idx !== -1) currentGroup.expenses[idx] = expData;
+          showToast('Group expense updated!');
+        } else {
+          currentGroup.expenses.unshift(expData);
+          showToast(`Group expense added (${currentSplitMode.toUpperCase()})!`);
+        }
         saveAndRenderGroup();
-        broadcastGroupExpense(newExp);
-        showToast(`Group expense added (${currentSplitMode.toUpperCase()})!`);
+        broadcastGroupState();
       }
 
       inputAmount.value = '';
       document.getElementById('inputTitle').value = '';
+      editingExpenseId = null;
       addModal.style.display = 'none';
     });
 
     /* ==============================================================
-       8. WHATSAPP SUMMARY EXPORT & SHARE
+       10. WHATSAPP SUMMARY EXPORT & SHARE
     ============================================================== */
     document.getElementById('btnExportWhatsApp').addEventListener('click', () => {
       const { transactions } = calculateSettlements();
@@ -1448,7 +1885,7 @@
       } else {
         summaryText += `*Pending Settlements:*\n`;
         transactions.forEach(t => {
-          summaryText += `👉 *${t.from}* pays *${t.to}*: ₹${t.amount.toLocaleString('en-IN')}\n`;
+          summaryText += `👉 *${t.from}* owes *${t.to}*: ₹${t.amount.toLocaleString('en-IN')}\n`;
         });
       }
       summaryText += `\nTracked via Kharacha App`;
@@ -1458,7 +1895,7 @@
     });
 
     /* ==============================================================
-       9. MODAL & TAB BINDINGS
+       11. MODAL & TAB BINDINGS
     ============================================================== */
     const tabPersonal = document.getElementById('tabPersonal');
     const tabGroup = document.getElementById('tabGroup');
@@ -1490,6 +1927,9 @@
     let modalMode = 'personal';
 
     manualAddBtn.addEventListener('click', () => {
+      editingExpenseId = null;
+      document.getElementById('modalHeadingText').textContent = 'Add New Expense';
+      document.getElementById('expenseTypeGroup').style.display = 'block';
       modalMode = currentTab;
       updateModalFields();
       addModal.style.display = 'flex';
@@ -1520,7 +1960,6 @@
         modalTypePersonal.classList.remove('active');
         groupSplitFields.style.display = 'block';
 
-        // Single Payer Select
         selectSinglePayer.innerHTML = '';
         currentGroup.members.forEach(m => {
           const opt = document.createElement('option');

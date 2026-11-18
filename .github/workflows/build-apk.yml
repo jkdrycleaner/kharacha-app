@@ -56,9 +56,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0-release
-          name: "Kharacha Voice & Split Expense App"
-          body: "Official Release of Kharacha APK with Voice Recognition, 4 Split Modes, and Multi-Payers."
+          tag_name: v1.1-release
+          name: "Kharacha v1.1 - Voice Clarification, Edit/Delete, Friends & Payment Modes"
+          body: "Official Release v1.1 of Kharacha APK:\n- Smart Voice Clarification Dialog\n- Edit & Delete Expense Options\n- Add / Remove Friends Group Manager\n- Payment Modes (UPI, Cash, Card, NetBanking)\n- 4-Mode Split Engine & Cloud Sync"
           files: android/app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
