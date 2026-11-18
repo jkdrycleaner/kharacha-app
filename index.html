@@ -644,7 +644,10 @@
 
       <div class="section-header">
         <div class="section-title">Personal Expense History</div>
-        <span style="font-size: 11px; color: var(--text-muted);" id="dateLabel">Recent</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button id="btnManageCategories" style="background:#F1F5F9; border:1px solid var(--card-border); color:var(--accent); font-size:11px; font-weight:700; padding:4px 10px; border-radius:12px; cursor:pointer;">🏷️ Categories</button>
+          <span style="font-size: 11px; color: var(--text-muted);" id="dateLabel">Recent</span>
+        </div>
       </div>
 
       <div class="expense-list" id="personalExpenseList"></div>
@@ -766,8 +769,24 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Title / Note</label>
+        <label class="form-label">Title / Expense Item</label>
         <input type="text" id="inputTitle" class="form-control" placeholder="e.g. Hotel stay or Dinner" required>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div class="form-group">
+          <label class="form-label">Date (तारीख)</label>
+          <input type="date" id="inputDate" class="form-control">
+        </div>
+        <div class="form-group" id="personalCategorySelectGroup">
+          <label class="form-label">Category</label>
+          <select id="selectPersonalCategory" class="form-control"></select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Remark / Note (टिप्पणी / विवरण)</label>
+        <input type="text" id="inputRemark" class="form-control" placeholder="e.g. Paid for taxi at station">
       </div>
 
       <!-- Payment Mode Selector -->
@@ -840,6 +859,31 @@
   </div>
 
   <!-- Voice Clarification & Confirmation Modal -->
+  
+  <!-- Manage Categories Modal (Add / Remove Personal Expense Categories) -->
+  <div id="categoryModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 6px;">Manage Expense Categories</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Add new categories or delete existing ones for personal expenses.</p>
+
+      <div class="form-group">
+        <label class="form-label">Current Categories</label>
+        <div id="currentCategoriesChipsList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom: 14px;"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Add New Category</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="inputNewCategoryEmoji" class="form-control" placeholder="Emoji (e.g. ☕)" style="width: 70px; text-align:center;">
+          <input type="text" id="inputNewCategoryName" class="form-control" placeholder="Category Name (e.g. Gym, Snacks)">
+          <button type="button" id="btnAddCategoryBtn" class="btn-primary" style="width: 80px; padding: 10px;">+ Add</button>
+        </div>
+      </div>
+
+      <button type="button" id="btnCloseCategoryModal" class="btn-secondary" style="margin-top: 14px;">Done</button>
+    </div>
+  </div>
+
   <div id="voiceConfirmModal" class="modal-backdrop" style="display: none;">
     <div class="modal-card">
       <div style="font-size:24px; text-align:center; margin-bottom:4px;">🤔</div>
@@ -855,18 +899,32 @@
       </div>
 
       <div class="form-group" id="voiceGroupSplitSection">
-        <label class="form-label">Split Among Members</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label class="form-label" style="margin-bottom:0;">Split Among Members (किनमें बांटना है?)</label>
+          <button type="button" id="btnVoiceSelectAllMembers" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:700; cursor:pointer;">Select All</button>
+        </div>
         <div id="voiceMembersCheckboxContainer" style="display:flex; flex-direction:column; gap:6px; background:#F8FAFC; padding:10px; border-radius:8px; border:1px solid var(--card-border);"></div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Payment Mode</label>
-        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-          <button type="button" class="btn-pill voice-pay-pill active" data-pay="UPI">📱 UPI</button>
-          <button type="button" class="btn-pill voice-pay-pill" data-pay="Cash">💵 Cash</button>
-          <button type="button" class="btn-pill voice-pay-pill" data-pay="Card">💳 Card</button>
-          <button type="button" class="btn-pill voice-pay-pill" data-pay="NetBanking">🏦 NetBanking</button>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div class="form-group">
+          <label class="form-label">Date (तारीख)</label>
+          <input type="date" id="voiceInputDate" class="form-control">
         </div>
+        <div class="form-group">
+          <label class="form-label">Payment Mode</label>
+          <select id="voicePaymentModeSelect" class="form-control">
+            <option value="UPI">📱 UPI</option>
+            <option value="Cash">💵 Cash</option>
+            <option value="Card">💳 Card</option>
+            <option value="NetBanking">🏦 NetBanking</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Remark / Note (वैकल्पिक)</label>
+        <input type="text" id="voiceInputRemark" class="form-control" placeholder="e.g. Dinner with Rahul">
       </div>
 
       <button type="button" id="btnConfirmVoiceSave" class="btn-primary" style="margin-top:8px;">Confirm &amp; Save Expense</button>
@@ -926,22 +984,49 @@
       ]
     }));
 
-    const CATEGORIES = {
-      food: { emoji: '🍔', label: 'Food & Drinks', keywords: ['chai', 'tea', 'coffee', 'khana', 'dinner', 'lunch', 'breakfast', 'pizza', 'burger', 'hotel', 'restaurant', 'dhaba', 'samosa', 'zomato', 'swiggy'] },
-      fuel: { emoji: '⛽', label: 'Fuel & Travel', keywords: ['petrol', 'diesel', 'fuel', 'auto', 'cab', 'uber', 'ola', 'metro', 'fare', 'toll', 'parking', 'bike', 'car', 'flight'] },
-      grocery: { emoji: '🛍️', label: 'Shopping & Grocery', keywords: ['ration', 'doodh', 'milk', 'grocery', 'sabji', 'vegetable', 'fruit', 'shop', 'amazon', 'flipkart', 'kapde'] },
-      bills: { emoji: '🏠', label: 'Bills & Utilities', keywords: ['rent', 'kiraya', 'bijli', 'electricity', 'wifi', 'recharge', 'water', 'gas', 'cylinder'] },
-      entertainment: { emoji: '🎬', label: 'Entertainment', keywords: ['movie', 'cinema', 'party', 'netflix', 'game', 'fun', 'outing', 'club'] },
-      health: { emoji: '💊', label: 'Health & Medical', keywords: ['dawai', 'medicine', 'doctor', 'hospital', 'medical', 'clinic'] }
-    };
+    let customCategories = JSON.parse(localStorage.getItem('kharacha_categories') || JSON.stringify([
+      { key: 'food', emoji: '🍔', label: 'Food & Drinks', keywords: ['chai', 'tea', 'coffee', 'khana', 'dinner', 'lunch', 'breakfast', 'pizza', 'burger', 'hotel', 'restaurant', 'dhaba', 'samosa', 'zomato', 'swiggy'] },
+      { key: 'fuel', emoji: '⛽', label: 'Fuel & Travel', keywords: ['petrol', 'diesel', 'fuel', 'auto', 'cab', 'uber', 'ola', 'metro', 'fare', 'toll', 'parking', 'bike', 'car', 'flight'] },
+      { key: 'grocery', emoji: '🛍️', label: 'Shopping & Grocery', keywords: ['ration', 'doodh', 'milk', 'grocery', 'sabji', 'vegetable', 'fruit', 'shop', 'amazon', 'flipkart', 'kapde'] },
+      { key: 'bills', emoji: '🏠', label: 'Bills & Utilities', keywords: ['rent', 'kiraya', 'bijli', 'electricity', 'wifi', 'recharge', 'water', 'gas', 'cylinder'] },
+      { key: 'entertainment', emoji: '🎬', label: 'Entertainment', keywords: ['movie', 'cinema', 'party', 'netflix', 'game', 'fun', 'outing', 'club'] },
+      { key: 'health', emoji: '💊', label: 'Health & Medical', keywords: ['dawai', 'medicine', 'doctor', 'hospital', 'medical', 'clinic'] }
+    ]));
+
+    let CATEGORIES = {};
+    function rebuildCategoriesMap() {
+      CATEGORIES = {};
+      customCategories.forEach(c => {
+        CATEGORIES[c.key] = c;
+      });
+      localStorage.setItem('kharacha_categories', JSON.stringify(customCategories));
+      populateCategorySelects();
+    }
+
+    function populateCategorySelects() {
+      const select = document.getElementById('selectPersonalCategory');
+      if (!select) return;
+      select.innerHTML = '';
+      customCategories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.key;
+        opt.textContent = `${c.emoji} ${c.label}`;
+        select.appendChild(opt);
+      });
+    }
 
     function detectCategory(text) {
       const lower = text.toLowerCase();
-      for (const [key, data] of Object.entries(CATEGORIES)) {
-        for (const kw of data.keywords) {
-          if (lower.includes(kw)) {
-            return { key, ...data };
+      for (const cat of customCategories) {
+        if (cat.keywords && Array.isArray(cat.keywords)) {
+          for (const kw of cat.keywords) {
+            if (lower.includes(kw)) {
+              return cat;
+            }
           }
+        }
+        if (lower.includes(cat.label.toLowerCase())) {
+          return cat;
         }
       }
       return { key: 'other', emoji: '💸', label: 'General Expense' };
@@ -1157,7 +1242,10 @@
     const btnCancelVoiceModal = document.getElementById('btnCancelVoiceModal');
 
     let voiceSelectedScope = 'group';
-    let voiceSelectedPayMode = 'UPI';
+    const voiceInputDate = document.getElementById('voiceInputDate');
+    const voicePaymentModeSelect = document.getElementById('voicePaymentModeSelect');
+    const voiceInputRemark = document.getElementById('voiceInputRemark');
+    const btnVoiceSelectAllMembers = document.getElementById('btnVoiceSelectAllMembers');
 
     btnVoiceScopePersonal.addEventListener('click', () => {
       voiceSelectedScope = 'personal';
@@ -1173,13 +1261,14 @@
       voiceGroupSplitSection.style.display = 'block';
     });
 
-    document.querySelectorAll('.voice-pay-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.voice-pay-pill').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        voiceSelectedPayMode = btn.dataset.pay;
+    if (btnVoiceSelectAllMembers) {
+      btnVoiceSelectAllMembers.addEventListener('click', () => {
+        const boxes = voiceMembersCheckboxContainer.querySelectorAll('input');
+        const allChecked = Array.from(boxes).every(b => b.checked);
+        boxes.forEach(b => b.checked = !allChecked);
+        btnVoiceSelectAllMembers.textContent = allChecked ? 'Select All' : 'Deselect All';
       });
-    });
+    }
 
     btnCancelVoiceModal.addEventListener('click', () => {
       voiceConfirmModal.style.display = 'none';
@@ -1189,19 +1278,24 @@
     btnConfirmVoiceSave.addEventListener('click', () => {
       if (!pendingVoiceData) return;
 
+      const chosenDate = voiceInputDate.value ? new Date(voiceInputDate.value + 'T12:00:00').toISOString() : new Date().toISOString();
+      const chosenPay = voicePaymentModeSelect ? voicePaymentModeSelect.value : (pendingVoiceData.pay || 'UPI');
+      const chosenRemark = voiceInputRemark.value.trim();
+
       if (voiceSelectedScope === 'personal') {
         const newExp = {
           id: Date.now().toString(),
           title: pendingVoiceData.title,
           amount: pendingVoiceData.amount,
-          paymentMode: voiceSelectedPayMode,
+          paymentMode: chosenPay,
           category: pendingVoiceData.cat.key,
           emoji: pendingVoiceData.cat.emoji,
-          date: new Date().toISOString()
+          date: chosenDate,
+          remark: chosenRemark
         };
         personalExpenses.unshift(newExp);
         saveAndRenderPersonal();
-        showToast(`✅ Personal: ₹${newExp.amount} (${newExp.title} • ${voiceSelectedPayMode}) Saved!`);
+        showToast(`✅ Personal: ₹${newExp.amount} (${newExp.title} • ${chosenPay}) Saved!`);
       } else {
         const checkedMembers = Array.from(voiceMembersCheckboxContainer.querySelectorAll('input:checked')).map(i => i.value);
         if (checkedMembers.length === 0) {
@@ -1218,40 +1312,43 @@
           title: pendingVoiceData.title,
           amount: pendingVoiceData.amount,
           paidBy: 'You',
-          paymentMode: voiceSelectedPayMode,
+          paymentMode: chosenPay,
           splitMode: 'equal',
           splitData: splitData,
-          date: new Date().toISOString()
+          date: chosenDate,
+          remark: chosenRemark
         };
         currentGroup.expenses.unshift(newExp);
         saveAndRenderGroup();
         broadcastGroupState();
-        showToast(`✅ Split ₹${newExp.amount} (${voiceSelectedPayMode}) among ${checkedMembers.join(', ')}!`);
+        showToast(`✅ Split ₹${newExp.amount} (${chosenPay}) among ${checkedMembers.join(', ')}!`);
       }
 
       voiceConfirmModal.style.display = 'none';
       pendingVoiceData = null;
     });
 
-    function askVoiceClarification(amount, title, cat, pay) {
+    function askVoiceClarification(amount, title, cat, pay, preCheckedMembers = null, defaultScope = null) {
       pendingVoiceData = { amount, title, cat, pay };
-      voiceSelectedPayMode = pay;
-      document.querySelectorAll('.voice-pay-pill').forEach(b => {
-        b.classList.toggle('active', b.dataset.pay === pay);
-      });
+      if (voicePaymentModeSelect) voicePaymentModeSelect.value = pay || 'UPI';
+      if (voiceInputDate) voiceInputDate.value = new Date().toISOString().split('T')[0];
+      if (voiceInputRemark) voiceInputRemark.value = '';
 
-      voiceConfirmSubtext.textContent = `₹${amount} "${title}" को कहाँ जोड़ना है?`;
+      voiceConfirmSubtext.textContent = `₹${amount} "${title}" को कन्फर्म करें`;
 
-      // Pre-fill members checkboxes
+      // Fill members checkboxes
       voiceMembersCheckboxContainer.innerHTML = '';
+      const toCheck = preCheckedMembers && preCheckedMembers.length > 0 ? preCheckedMembers : ['You'];
       currentGroup.members.forEach(m => {
         const label = document.createElement('label');
         label.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-main); font-weight:600; cursor:pointer;';
-        label.innerHTML = `<input type="checkbox" value="${m}" checked style="accent-color:var(--accent);"> ${m}`;
+        const isChecked = toCheck.includes(m);
+        label.innerHTML = `<input type="checkbox" value="${m}" ${isChecked ? 'checked' : ''} style="accent-color:var(--accent);"> ${m}`;
         voiceMembersCheckboxContainer.appendChild(label);
       });
 
-      if (currentTab === 'group') {
+      const scope = defaultScope || (currentTab === 'group' ? 'group' : 'personal');
+      if (scope === 'group') {
         btnVoiceScopeGroup.click();
       } else {
         btnVoiceScopePersonal.click();
@@ -1278,72 +1375,31 @@
       if (!title) title = cat.label;
       title = title.charAt(0).toUpperCase() + title.slice(1);
 
-      // Check if text mentions members or says "all / sabhi / sab / split"
       const lower = text.toLowerCase();
       let explicitSplit = false;
       let splitAmong = [];
 
-      if (lower.includes('sab') || lower.includes('all') || lower.includes('everyone') || lower.includes('barabar') || lower.includes('split') || lower.includes('baant')) {
+      if (lower.includes('sab') || lower.includes('all') || lower.includes('everyone') || lower.includes('barabar') || lower.includes('sabhi')) {
         explicitSplit = true;
         splitAmong = [...currentGroup.members];
       } else {
         currentGroup.members.forEach(m => {
-          if (lower.includes(m.toLowerCase())) {
+          if (m !== 'You' && lower.includes(m.toLowerCase())) {
             explicitSplit = true;
             splitAmong.push(m);
           }
         });
-      }
-
-      // If user did not specify split options clearly (No member mentioned and not in group tab)
-      if (!explicitSplit && currentTab !== 'group') {
-        // Smart Clarification Popup!
-        askVoiceClarification(amount, title, cat, pay);
-        return;
-      }
-
-      if (currentTab === 'group' || explicitSplit) {
-        // GROUP SPLIT ENTRY
-        if (!splitAmong.includes('You')) splitAmong.push('You');
-        if (splitAmong.length === 1 && currentGroup.members.length > 1) {
-          splitAmong = [...currentGroup.members];
+        if (splitAmong.length > 0 && !splitAmong.includes('You')) {
+          splitAmong.unshift('You');
         }
-
-        const splitData = {};
-        const shareAmt = Math.round((amount / splitAmong.length) * 100) / 100;
-        splitAmong.forEach(m => splitData[m] = shareAmt);
-
-        const newExp = {
-          id: Date.now().toString(),
-          title: title,
-          amount: amount,
-          paidBy: 'You',
-          paymentMode: pay,
-          splitMode: 'equal',
-          splitData: splitData,
-          date: new Date().toISOString()
-        };
-
-        currentGroup.expenses.unshift(newExp);
-        saveAndRenderGroup();
-        broadcastGroupState();
-        showToast(`✅ Split ₹${amount} (${pay}) among ${splitAmong.join(', ')}!`);
-      } else {
-        // PERSONAL EXPENSE ENTRY
-        const newExp = {
-          id: Date.now().toString(),
-          title: title,
-          amount: amount,
-          paymentMode: pay,
-          category: cat.key,
-          emoji: cat.emoji,
-          date: new Date().toISOString()
-        };
-
-        personalExpenses.unshift(newExp);
-        saveAndRenderPersonal();
-        showToast(`✅ ₹${amount} (${cat.emoji} ${newExp.title} • ${pay}) Saved!`);
       }
+
+      // If user mentions split or we are in group tab or explicit friend name detected:
+      // ALWAYS show confirmation popup so user can confirm date, remark, and EXACT members!
+      const defaultScope = (currentTab === 'group' || explicitSplit) ? 'group' : 'personal';
+      const preMembers = splitAmong.length > 0 ? splitAmong : (currentTab === 'group' ? currentGroup.members : ['You']);
+
+      askVoiceClarification(amount, title, cat, pay, preMembers, defaultScope);
     }
 
     voiceMicBtn.addEventListener('click', toggleListening);
@@ -1384,9 +1440,10 @@
               <div>
                 <div class="item-title">${item.title}</div>
                 <div class="item-meta">
-                  ${timeFormatted} • ${CATEGORIES[item.category]?.label || 'General'}
+                  📅 ${itemDate.toLocaleDateString('en-IN', { day:'numeric', month:'short' })} • ${timeFormatted} • ${CATEGORIES[item.category]?.label || 'General'}
                   <span class="payment-badge">${item.paymentMode || 'UPI'}</span>
                 </div>
+                ${item.remark ? `<div style="font-size:11px; color:var(--text-muted); font-style:italic; margin-top:2px;">💬 ${item.remark}</div>` : ''}
               </div>
             </div>
             <div style="display:flex; align-items:center;">
@@ -1484,9 +1541,10 @@
               <div>
                 <div class="item-title">${exp.title}</div>
                 <div class="item-meta">
-                  ${payerStr} • <span style="color:var(--accent); font-weight:700;">${modeBadge}</span>
+                  📅 ${(exp.date ? new Date(exp.date) : new Date()).toLocaleDateString('en-IN', { day:'numeric', month:'short' })} • ${payerStr} • <span style="color:var(--accent); font-weight:700;">${modeBadge}</span>
                   <span class="payment-badge">${exp.paymentMode || 'UPI'}</span>
                 </div>
+                ${exp.remark ? `<div style="font-size:11px; color:var(--text-muted); font-style:italic; margin-top:2px;">💬 ${exp.remark}</div>` : ''}
               </div>
             </div>
             <div style="display:flex; align-items:center;">
@@ -1545,6 +1603,16 @@
       if (exp) {
         inputAmount.value = exp.amount;
         document.getElementById('inputTitle').value = exp.title;
+        document.getElementById('inputRemark').value = exp.remark || '';
+        document.getElementById('inputDate').value = exp.date ? new Date(exp.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+
+        if (type === 'personal') {
+          const selectCat = document.getElementById('selectPersonalCategory');
+          if (selectCat && exp.category) selectCat.value = exp.category;
+          document.getElementById('personalCategorySelectGroup').style.display = 'block';
+        } else {
+          document.getElementById('personalCategorySelectGroup').style.display = 'none';
+        }
 
         // Payment Mode
         selectedPaymentMode = exp.paymentMode || 'UPI';
@@ -1584,6 +1652,90 @@
     btnCloseMembersModal.addEventListener('click', () => {
       membersModal.style.display = 'none';
     });
+
+    /* ==============================================================
+       7B. MANAGE CATEGORIES (ADD & REMOVE PERSONAL CATEGORIES)
+    ============================================================== */
+    const categoryModal = document.getElementById('categoryModal');
+    const btnManageCategories = document.getElementById('btnManageCategories');
+    const btnCloseCategoryModal = document.getElementById('btnCloseCategoryModal');
+    const currentCategoriesChipsList = document.getElementById('currentCategoriesChipsList');
+    const inputNewCategoryEmoji = document.getElementById('inputNewCategoryEmoji');
+    const inputNewCategoryName = document.getElementById('inputNewCategoryName');
+    const btnAddCategoryBtn = document.getElementById('btnAddCategoryBtn');
+
+    if (btnManageCategories) {
+      btnManageCategories.addEventListener('click', () => {
+        renderCategoriesChips();
+        categoryModal.style.display = 'flex';
+      });
+    }
+
+    if (btnCloseCategoryModal) {
+      btnCloseCategoryModal.addEventListener('click', () => {
+        categoryModal.style.display = 'none';
+      });
+    }
+
+    function renderCategoriesChips() {
+      if (!currentCategoriesChipsList) return;
+      currentCategoriesChipsList.innerHTML = '';
+      customCategories.forEach((cat, index) => {
+        const chip = document.createElement('span');
+        chip.className = 'member-chip';
+        chip.style.cssText = 'background:#F1F5F9; border:1px solid var(--card-border); padding:6px 12px; border-radius:16px; display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700;';
+        chip.innerHTML = `
+          <span>${cat.emoji} ${cat.label}</span>
+          <span class="member-chip-remove" onclick="removeCategory(${index})" title="Remove Category" style="color:var(--danger); cursor:pointer; font-weight:900; margin-left:4px;">&times;</span>
+        `;
+        currentCategoriesChipsList.appendChild(chip);
+      });
+    }
+
+    window.removeCategory = function(index) {
+      if (customCategories.length <= 1) {
+        showToast('At least one category is required!');
+        return;
+      }
+      const removed = customCategories[index];
+      if (!confirm(`Delete category "${removed.label}"?`)) return;
+      customCategories.splice(index, 1);
+      rebuildCategoriesMap();
+      renderCategoriesChips();
+      saveAndRenderPersonal();
+      showToast(`Category "${removed.label}" removed.`);
+    };
+
+    if (btnAddCategoryBtn) {
+      btnAddCategoryBtn.addEventListener('click', () => {
+        const name = inputNewCategoryName.value.trim();
+        const emoji = inputNewCategoryEmoji.value.trim() || '🏷️';
+        if (!name) {
+          showToast('Please enter category name!');
+          return;
+        }
+
+        const key = name.toLowerCase().replace(/\s+/g, '_');
+        if (customCategories.some(c => c.key === key)) {
+          showToast('Category already exists!');
+          return;
+        }
+
+        customCategories.push({
+          key: key,
+          emoji: emoji,
+          label: name,
+          keywords: [name.toLowerCase()]
+        });
+
+        inputNewCategoryName.value = '';
+        inputNewCategoryEmoji.value = '';
+        rebuildCategoriesMap();
+        renderCategoriesChips();
+        saveAndRenderPersonal();
+        showToast(`✅ Added category "${name}"!`);
+      });
+    }
 
     function renderMembersChips() {
       currentMembersChipsList.innerHTML = '';
@@ -1768,16 +1920,22 @@
         return;
       }
 
+      const chosenDateVal = document.getElementById('inputDate').value;
+      const chosenExpDate = chosenDateVal ? new Date(chosenDateVal + 'T12:00:00').toISOString() : new Date().toISOString();
+      const chosenRemarkVal = document.getElementById('inputRemark').value.trim();
+
       if (modalMode === 'personal') {
-        const cat = detectCategory(title);
+        const selectedCatKey = document.getElementById('selectPersonalCategory').value;
+        const cat = CATEGORIES[selectedCatKey] || detectCategory(title);
         const expData = {
           id: editingExpenseId || Date.now().toString(),
           title: title,
           amount: amount,
           paymentMode: selectedPaymentMode,
-          category: cat.key,
-          emoji: cat.emoji,
-          date: new Date().toISOString()
+          category: cat.key || 'other',
+          emoji: cat.emoji || '💸',
+          date: chosenExpDate,
+          remark: chosenRemarkVal
         };
 
         if (editingExpenseId) {
@@ -1850,7 +2008,8 @@
           paymentMode: selectedPaymentMode,
           splitMode: currentSplitMode,
           splitData: splitData,
-          date: new Date().toISOString()
+          date: chosenExpDate,
+          remark: chosenRemarkVal
         };
 
         if (editingExpenseId) {
@@ -1867,6 +2026,7 @@
 
       inputAmount.value = '';
       document.getElementById('inputTitle').value = '';
+      document.getElementById('inputRemark').value = '';
       editingExpenseId = null;
       addModal.style.display = 'none';
     });
@@ -1930,6 +2090,8 @@
       editingExpenseId = null;
       document.getElementById('modalHeadingText').textContent = 'Add New Expense';
       document.getElementById('expenseTypeGroup').style.display = 'block';
+      document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('inputRemark').value = '';
       modalMode = currentTab;
       updateModalFields();
       addModal.style.display = 'flex';
@@ -1959,6 +2121,7 @@
         modalTypeGroup.classList.add('active');
         modalTypePersonal.classList.remove('active');
         groupSplitFields.style.display = 'block';
+        document.getElementById('personalCategorySelectGroup').style.display = 'none';
 
         selectSinglePayer.innerHTML = '';
         currentGroup.members.forEach(m => {
@@ -1973,6 +2136,8 @@
         modalTypePersonal.classList.add('active');
         modalTypeGroup.classList.remove('active');
         groupSplitFields.style.display = 'none';
+        document.getElementById('personalCategorySelectGroup').style.display = 'block';
+        populateCategorySelects();
       }
     }
 
@@ -2071,6 +2236,7 @@
     }
 
     // Initial Start
+    rebuildCategoriesMap();
     saveAndRenderPersonal();
     saveAndRenderGroup();
     initGroupSync();
