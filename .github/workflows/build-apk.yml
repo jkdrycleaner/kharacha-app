@@ -56,9 +56,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.2-release
-          name: "Kharacha v1.2 - Date Picker, Remarks, Category Manager & Smart Split Confirm"
-          body: "Official Release v1.2 of Kharacha APK:\n- Date selector for past/current expenses\n- Remark / Notes for both Personal and Group Split expenses\n- Category Manager: Add & Remove personal expense categories with custom emojis\n- Smart Voice Confirmation: Exact friend split selection with 1-tap confirmation dialog\n- Full 4-mode split, Multi-payer support and Live cloud sync"
+          tag_name: v1.3-release
+          name: "Kharacha v1.3 - Voice Interactive Dialog, Zero Mock Data, Group Month Total & Member Breakdown"
+          body: "Official Release v1.3 of Kharacha APK:\n- Conversational AI Voice: App speaks to confirm (Personal vs Split, Members, Payment mode) and listens for voice answers\n- Clean Database: Zero predefined/mock entries, 100% user-entered persistent data\n- Group Month Total: Tracks current month group expenses\n- Name-wise Member Expense & Share Breakdown (Paid vs Share with Net Balances)\n- Date picker, Remarks, Category manager, 4 Split modes, and Cloud sync"
           files: android/app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

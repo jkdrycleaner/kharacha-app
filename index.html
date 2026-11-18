@@ -659,9 +659,9 @@
         <!-- Active Group Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div>
-            <h2 id="currentGroupName" style="font-size: 18px; font-weight: 800; color:var(--text-main);">🏖️ Goa Trip 2026</h2>
+            <h2 id="currentGroupName" style="font-size: 18px; font-weight: 800; color:var(--text-main);">👥 My Split Group</h2>
             <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
-              Room Code: <b id="currentRoomCode" style="color: var(--accent); cursor: pointer;" title="Tap to copy">GOA713</b>
+              Room Code: <b id="currentRoomCode" style="color: var(--accent); cursor: pointer;" title="Tap to copy">GRP101</b>
               • <span id="membersCountText">3 Members</span>
             </div>
           </div>
@@ -691,14 +691,24 @@
           <div class="summary-amount"><small>₹</small><span id="groupTotalAmount">0</span></div>
           <div class="summary-subgrid">
             <div>
-              <div class="sub-stat-title">You Paid</div>
-              <div class="sub-stat-val" style="color:var(--text-main);">₹<span id="youPaidAmount">0</span></div>
+              <div class="sub-stat-title">📅 This Month (इस महीने का खर्च)</div>
+              <div class="sub-stat-val" style="color:var(--accent);">₹<span id="groupMonthTotalAmount">0</span></div>
             </div>
             <div>
-              <div class="sub-stat-title">Your Share</div>
+              <div class="sub-stat-title">Your Share (आपका हिस्सा)</div>
               <div class="sub-stat-val" style="color:var(--warning);">₹<span id="yourShareAmount">0</span></div>
             </div>
           </div>
+          <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--card-border); font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between;">
+            <span>You Paid in Total:</span>
+            <b style="color:var(--text-main);">₹<span id="youPaidAmount">0</span></b>
+          </div>
+        </div>
+
+        <!-- Member-Wise Expense & Share Breakdown Card -->
+        <div class="clean-card" style="padding: 14px 16px;">
+          <div class="summary-title" style="margin-bottom: 8px;">👤 Member-wise Breakdown (किसका कितना खर्च &amp; शेयर)</div>
+          <div id="memberWiseBreakdownList" style="display:flex; flex-direction:column; gap:8px;"></div>
         </div>
 
         <!-- Settlements Calculation (Simplify Debts) -->
@@ -890,6 +900,20 @@
       <h3 style="font-size: 17px; font-weight: 800; text-align:center; margin-bottom: 6px;">Confirm Voice Expense</h3>
       <p id="voiceConfirmSubtext" style="font-size: 12px; color: var(--text-muted); text-align:center; margin-bottom: 16px;">किसमें और कैसे स्प्लिट करना है?</p>
 
+      <!-- Voice AI Interactive Prompt Banner -->
+      <div id="voiceAssistantBanner" style="background:linear-gradient(135deg, #CCFBF1, #F0FDFA); border:1px solid #99F6E4; border-radius:12px; padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:20px;">🤖</span>
+          <div>
+            <div id="voiceAssistantQuestion" style="font-size:13px; font-weight:800; color:#0F766E;">"Personal ya Group Split?"</div>
+            <div id="voiceAssistantHelp" style="font-size:11px; color:#115E59;">माइक ऑन है, बोलकर उत्तर दें...</div>
+          </div>
+        </div>
+        <button type="button" id="btnVoiceReplyMic" style="background:#0D9488; color:#fff; border:none; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(13,148,136,0.3);" title="Speak Answer">
+          🎙️
+        </button>
+      </div>
+
       <div class="form-group">
         <label class="form-label">Expense Scope (कहाँ जोड़ना है?)</label>
         <div style="display:flex; gap:8px;">
@@ -908,8 +932,8 @@
 
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
         <div class="form-group">
-          <label class="form-label">Date (तारीख)</label>
-          <input type="date" id="voiceInputDate" class="form-control">
+          <label class="form-label">Category</label>
+          <select id="voiceCategorySelect" class="form-control"></select>
         </div>
         <div class="form-group">
           <label class="form-label">Payment Mode</label>
@@ -922,9 +946,15 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Remark / Note (वैकल्पिक)</label>
-        <input type="text" id="voiceInputRemark" class="form-control" placeholder="e.g. Dinner with Rahul">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div class="form-group">
+          <label class="form-label">Date (तारीख)</label>
+          <input type="date" id="voiceInputDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Remark / Note</label>
+          <input type="text" id="voiceInputRemark" class="form-control" placeholder="e.g. Chai nashta">
+        </div>
       </div>
 
       <button type="button" id="btnConfirmVoiceSave" class="btn-primary" style="margin-top:8px;">Confirm &amp; Save Expense</button>
@@ -975,13 +1005,10 @@
 
     // Default sample group with live calculations
     let currentGroup = JSON.parse(localStorage.getItem('kharacha_active_group') || JSON.stringify({
-      id: 'GOA713',
-      name: '🏖️ Goa Trip 2026',
-      members: ['You', 'Rahul', 'Aman'],
-      expenses: [
-        { id: '1', title: 'Hotel Booking', amount: 3000, paidBy: 'You', paymentMode: 'UPI', splitMode: 'equal', splitData: { 'You': 1000, 'Rahul': 1000, 'Aman': 1000 }, date: new Date().toISOString() },
-        { id: '2', title: 'Dinner at Beach', amount: 1500, paidBy: 'Rahul', paymentMode: 'Cash', splitMode: 'equal', splitData: { 'You': 500, 'Rahul': 500, 'Aman': 500 }, date: new Date().toISOString() }
-      ]
+      id: 'GRP' + Math.floor(100 + Math.random() * 900),
+      name: '👥 My Split Group',
+      members: ['You'],
+      expenses: []
     }));
 
     let customCategories = JSON.parse(localStorage.getItem('kharacha_categories') || JSON.stringify([
@@ -1005,13 +1032,16 @@
 
     function populateCategorySelects() {
       const select = document.getElementById('selectPersonalCategory');
-      if (!select) return;
-      select.innerHTML = '';
-      customCategories.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.key;
-        opt.textContent = `${c.emoji} ${c.label}`;
-        select.appendChild(opt);
+      const voiceSelect = document.getElementById('voiceCategorySelect');
+      [select, voiceSelect].forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '';
+        customCategories.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.key;
+          opt.textContent = `${c.emoji} ${c.label}`;
+          sel.appendChild(opt);
+        });
       });
     }
 
@@ -1168,6 +1198,35 @@
     let recognition = null;
     let isListening = false;
 
+    
+    /* ==============================================================
+       AI CONVERSATIONAL VOICE ASSISTANT (TTS & STT INTERACTION)
+    ============================================================== */
+    function speakText(text, onComplete) {
+      if (!('speechSynthesis' in window)) {
+        if (onComplete) onComplete();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'hi-IN';
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+
+      // Try finding Hindi / Indian voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const hiVoice = voices.find(v => v.lang.includes('hi') || v.lang.includes('IN'));
+      if (hiVoice) utterance.voice = hiVoice;
+
+      utterance.onend = () => {
+        if (onComplete) onComplete();
+      };
+      utterance.onerror = () => {
+        if (onComplete) onComplete();
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
@@ -1209,7 +1268,13 @@
 
       recognition.onend = () => {
         stopListening();
-        processVoiceCommand(voiceTranscript.textContent.replace(/"/g, ''));
+        const spoken = voiceTranscript.textContent.replace(/"/g, '').trim();
+        if (isListeningForReply) {
+          isListeningForReply = false;
+          handleVoiceReply(spoken);
+        } else {
+          processVoiceCommand(spoken);
+        }
       };
     } else {
       voiceMicBtn.addEventListener('click', () => {
@@ -1244,8 +1309,14 @@
     let voiceSelectedScope = 'group';
     const voiceInputDate = document.getElementById('voiceInputDate');
     const voicePaymentModeSelect = document.getElementById('voicePaymentModeSelect');
+    const voiceCategorySelect = document.getElementById('voiceCategorySelect');
     const voiceInputRemark = document.getElementById('voiceInputRemark');
     const btnVoiceSelectAllMembers = document.getElementById('btnVoiceSelectAllMembers');
+    const voiceAssistantQuestion = document.getElementById('voiceAssistantQuestion');
+    const voiceAssistantHelp = document.getElementById('voiceAssistantHelp');
+    const btnVoiceReplyMic = document.getElementById('btnVoiceReplyMic');
+
+    let voiceConvStage = 'scope'; // 'scope', 'members', 'paymode', 'remark', 'confirm'
 
     btnVoiceScopePersonal.addEventListener('click', () => {
       voiceSelectedScope = 'personal';
@@ -1272,6 +1343,7 @@
 
     btnCancelVoiceModal.addEventListener('click', () => {
       voiceConfirmModal.style.display = 'none';
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       pendingVoiceData = null;
     });
 
@@ -1280,6 +1352,8 @@
 
       const chosenDate = voiceInputDate.value ? new Date(voiceInputDate.value + 'T12:00:00').toISOString() : new Date().toISOString();
       const chosenPay = voicePaymentModeSelect ? voicePaymentModeSelect.value : (pendingVoiceData.pay || 'UPI');
+      const chosenCatKey = voiceCategorySelect ? voiceCategorySelect.value : pendingVoiceData.cat.key;
+      const catObj = CATEGORIES[chosenCatKey] || pendingVoiceData.cat;
       const chosenRemark = voiceInputRemark.value.trim();
 
       if (voiceSelectedScope === 'personal') {
@@ -1288,18 +1362,20 @@
           title: pendingVoiceData.title,
           amount: pendingVoiceData.amount,
           paymentMode: chosenPay,
-          category: pendingVoiceData.cat.key,
-          emoji: pendingVoiceData.cat.emoji,
+          category: catObj.key || 'other',
+          emoji: catObj.emoji || '💸',
           date: chosenDate,
           remark: chosenRemark
         };
         personalExpenses.unshift(newExp);
         saveAndRenderPersonal();
         showToast(`✅ Personal: ₹${newExp.amount} (${newExp.title} • ${chosenPay}) Saved!`);
+        speakText(`Personal expense saved.`);
       } else {
         const checkedMembers = Array.from(voiceMembersCheckboxContainer.querySelectorAll('input:checked')).map(i => i.value);
         if (checkedMembers.length === 0) {
           showToast('Select at least one member to split!');
+          speakText('Kripya kam se kam ek dost select karein');
           return;
         }
 
@@ -1322,19 +1398,116 @@
         saveAndRenderGroup();
         broadcastGroupState();
         showToast(`✅ Split ₹${newExp.amount} (${chosenPay}) among ${checkedMembers.join(', ')}!`);
+        speakText(`₹${newExp.amount} split record ho gaya.`);
       }
 
       voiceConfirmModal.style.display = 'none';
       pendingVoiceData = null;
     });
 
+    // Start Interactive Voice Flow Step
+    function promptNextVoiceStage() {
+      if (voiceConvStage === 'scope') {
+        const q = "Personal kharcha hai ya Group me Split karna hai?";
+        voiceAssistantQuestion.textContent = `"${q}"`;
+        voiceAssistantHelp.textContent = 'Boliye: "Personal" ya "Split"';
+        speakText(q, () => startReplyListening());
+      } else if (voiceConvStage === 'members') {
+        if (voiceSelectedScope === 'personal' || currentGroup.members.length <= 1) {
+          voiceConvStage = 'paymode';
+          promptNextVoiceStage();
+          return;
+        }
+        const q = "Kin kin dosto me split karna hai?";
+        voiceAssistantQuestion.textContent = `"${q}"`;
+        voiceAssistantHelp.textContent = 'Dosto ke naam boliye ya "Sabhi"';
+        speakText(q, () => startReplyListening());
+      } else if (voiceConvStage === 'paymode') {
+        const q = "Payment mode kya tha? UPI ya Cash?";
+        voiceAssistantQuestion.textContent = `"${q}"`;
+        voiceAssistantHelp.textContent = 'Boliye: "UPI", "Cash", ya "Card"';
+        speakText(q, () => startReplyListening());
+      } else if (voiceConvStage === 'confirm') {
+        const q = "Kya expense confirm karke save kar doon?";
+        voiceAssistantQuestion.textContent = `"${q}"`;
+        voiceAssistantHelp.textContent = 'Boliye "Haan" ya "Save"';
+        speakText(q, () => startReplyListening());
+      }
+    }
+
+    function startReplyListening() {
+      if (!recognition) return;
+      try {
+        isListeningForReply = true;
+        recognition.start();
+      } catch(e) {}
+    }
+
+    let isListeningForReply = false;
+    if (btnVoiceReplyMic) {
+      btnVoiceReplyMic.addEventListener('click', () => {
+        promptNextVoiceStage();
+      });
+    }
+
+    function handleVoiceReply(text) {
+      const lower = text.toLowerCase().trim();
+
+      if (voiceConvStage === 'scope') {
+        if (lower.includes('split') || lower.includes('group') || lower.includes('baant') || lower.includes('dost')) {
+          btnVoiceScopeGroup.click();
+          voiceConvStage = 'members';
+        } else {
+          btnVoiceScopePersonal.click();
+          voiceConvStage = 'paymode';
+        }
+        promptNextVoiceStage();
+      } else if (voiceConvStage === 'members') {
+        if (lower.includes('sab') || lower.includes('all') || lower.includes('everyone') || lower.includes('sabhi')) {
+          voiceMembersCheckboxContainer.querySelectorAll('input').forEach(b => b.checked = true);
+        } else {
+          let matchedAny = false;
+          voiceMembersCheckboxContainer.querySelectorAll('input').forEach(b => {
+            const m = b.value.toLowerCase();
+            if (m === 'you' || lower.includes(m)) {
+              b.checked = true;
+              matchedAny = true;
+            } else {
+              b.checked = false;
+            }
+          });
+          if (!matchedAny) {
+            voiceMembersCheckboxContainer.querySelectorAll('input').forEach(b => b.checked = true);
+          }
+        }
+        voiceConvStage = 'paymode';
+        promptNextVoiceStage();
+      } else if (voiceConvStage === 'paymode') {
+        const detectedMode = detectPaymentMode(lower);
+        if (voicePaymentModeSelect) voicePaymentModeSelect.value = detectedMode;
+        voiceConvStage = 'confirm';
+        promptNextVoiceStage();
+      } else if (voiceConvStage === 'confirm') {
+        if (lower.includes('haan') || lower.includes('yes') || lower.includes('kar do') || lower.includes('save') || lower.includes('thik')) {
+          btnConfirmVoiceSave.click();
+        } else if (lower.includes('nahin') || lower.includes('cancel') || lower.includes('no')) {
+          btnCancelVoiceModal.click();
+        } else {
+          voiceAssistantHelp.textContent = 'Button dabakar save kar sakte hain.';
+        }
+      }
+    }
+
     function askVoiceClarification(amount, title, cat, pay, preCheckedMembers = null, defaultScope = null) {
       pendingVoiceData = { amount, title, cat, pay };
+      populateCategorySelects();
+
       if (voicePaymentModeSelect) voicePaymentModeSelect.value = pay || 'UPI';
+      if (voiceCategorySelect && cat) voiceCategorySelect.value = cat.key || 'other';
       if (voiceInputDate) voiceInputDate.value = new Date().toISOString().split('T')[0];
       if (voiceInputRemark) voiceInputRemark.value = '';
 
-      voiceConfirmSubtext.textContent = `₹${amount} "${title}" को कन्फर्म करें`;
+      voiceConfirmSubtext.textContent = `₹${amount} "${title}"`;
 
       // Fill members checkboxes
       voiceMembersCheckboxContainer.innerHTML = '';
@@ -1350,11 +1523,18 @@
       const scope = defaultScope || (currentTab === 'group' ? 'group' : 'personal');
       if (scope === 'group') {
         btnVoiceScopeGroup.click();
+        voiceConvStage = preCheckedMembers && preCheckedMembers.length > 1 ? 'paymode' : 'members';
       } else {
         btnVoiceScopePersonal.click();
+        voiceConvStage = 'scope';
       }
 
       voiceConfirmModal.style.display = 'flex';
+
+      // Ask question by Voice automatically!
+      setTimeout(() => {
+        promptNextVoiceStage();
+      }, 400);
     }
 
     function processVoiceCommand(rawText) {
@@ -1473,29 +1653,88 @@
       document.getElementById('currentRoomCode').textContent = currentGroup.id;
       document.getElementById('membersCountText').textContent = `${currentGroup.members.length} Members: ${currentGroup.members.join(', ')}`;
 
-      // Calculate totals
+      // Calculate totals & Month total
       let groupTotal = 0;
+      let groupMonthTotal = 0;
       let youPaid = 0;
       let yourShare = 0;
 
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+
+      // Track individual member paid & share totals
+      const memberPaidMap = {};
+      const memberShareMap = {};
+      currentGroup.members.forEach(m => {
+        memberPaidMap[m] = 0;
+        memberShareMap[m] = 0;
+      });
+
       currentGroup.expenses.forEach(exp => {
         groupTotal += exp.amount;
-        if (typeof exp.paidBy === 'object' && exp.paidBy !== null) {
-          if (exp.paidBy['You']) youPaid += exp.paidBy['You'];
-        } else if (exp.paidBy === 'You') {
-          youPaid += exp.amount;
+        const expDate = exp.date ? new Date(exp.date) : new Date();
+        if (expDate.getMonth() === currentMonth && expDate.getFullYear() === currentYear) {
+          groupMonthTotal += exp.amount;
         }
 
-        if (exp.splitData && exp.splitData['You']) {
-          yourShare += exp.splitData['You'];
-        } else if (exp.splitAmong && exp.splitAmong.includes('You')) {
-          yourShare += (exp.amount / exp.splitAmong.length);
+        // Paid By tracking
+        if (typeof exp.paidBy === 'object' && exp.paidBy !== null) {
+          for (const [m, amt] of Object.entries(exp.paidBy)) {
+            memberPaidMap[m] = (memberPaidMap[m] || 0) + amt;
+            if (m === 'You') youPaid += amt;
+          }
+        } else if (typeof exp.paidBy === 'string') {
+          memberPaidMap[exp.paidBy] = (memberPaidMap[exp.paidBy] || 0) + exp.amount;
+          if (exp.paidBy === 'You') youPaid += exp.amount;
+        }
+
+        // Share tracking
+        if (exp.splitData) {
+          for (const [m, amt] of Object.entries(exp.splitData)) {
+            memberShareMap[m] = (memberShareMap[m] || 0) + amt;
+            if (m === 'You') yourShare += amt;
+          }
+        } else if (exp.splitAmong) {
+          const s = exp.amount / exp.splitAmong.length;
+          exp.splitAmong.forEach(m => {
+            memberShareMap[m] = (memberShareMap[m] || 0) + s;
+            if (m === 'You') yourShare += s;
+          });
         }
       });
 
       document.getElementById('groupTotalAmount').textContent = groupTotal.toLocaleString('en-IN');
+      const monthElem = document.getElementById('groupMonthTotalAmount');
+      if (monthElem) monthElem.textContent = groupMonthTotal.toLocaleString('en-IN');
       document.getElementById('youPaidAmount').textContent = youPaid.toLocaleString('en-IN');
       document.getElementById('yourShareAmount').textContent = Math.round(yourShare).toLocaleString('en-IN');
+
+      // Render Member-wise breakdown list
+      const memberBreakdownContainer = document.getElementById('memberWiseBreakdownList');
+      if (memberBreakdownContainer) {
+        memberBreakdownContainer.innerHTML = '';
+        currentGroup.members.forEach(m => {
+          const paid = Math.round(memberPaidMap[m] || 0);
+          const share = Math.round(memberShareMap[m] || 0);
+          const net = paid - share;
+          const netBadge = net >= 0 
+            ? `<span style="color:var(--success); font-weight:800; font-size:12px;">+₹${net} (Gets back)</span>`
+            : `<span style="color:var(--danger); font-weight:800; font-size:12px;">-₹${Math.abs(net)} (Owes)</span>`;
+
+          const row = document.createElement('div');
+          row.style.cssText = 'background:#F8FAFC; border:1px solid var(--card-border); border-radius:10px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;';
+          row.innerHTML = `
+            <div>
+              <div style="font-weight:700; font-size:13px; color:var(--text-main);">👤 ${m}</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+                Paid: <b>₹${paid.toLocaleString('en-IN')}</b> • Share: <b>₹${share.toLocaleString('en-IN')}</b>
+              </div>
+            </div>
+            <div>${netBadge}</div>
+          `;
+          memberBreakdownContainer.appendChild(row);
+        });
+      }
 
       // Settlements Calculation
       const { transactions } = calculateSettlements();
